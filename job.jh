@@ -1,0 +1,134 @@
+/** 地理區劃 */
+entity Region {
+	/** 區域名稱 */
+	regionName String
+}
+
+/** 國家 */
+entity Country {
+	/** 國家名稱 */
+	countryName String
+}
+
+/** 地址 */
+entity Location {
+	/** 街道地址 */
+	streetAddress String
+    /** 郵遞區號 */
+	postalCode String
+    /** 城市 */
+	city String
+    /** 州或省 */
+	stateProvince String
+}
+
+/** 部門 */
+entity Department {
+	/** 部門名稱 */
+	departmentName String required
+}
+
+/**
+ * 任務
+ */
+entity Task {
+	/** 任務名稱 */
+	title String
+    /** 任務描述 */
+	description String
+}
+
+/** 員工 */
+@dto(mapstruct)
+entity Employee {
+	/** 名字 */
+	firstName String
+    /** 姓氏 */
+	lastName String
+    /** 電子郵件地址 */
+	email String
+    /** 電話號碼 */
+	phoneNumber String
+    /** 雇用日期 */
+	hireDate Instant
+    /** 薪資 */
+	salary Long
+    /** 佣金百分比 */
+	commissionPct Long
+}
+
+/** 職位 */
+entity Job {
+	/** 職稱 */
+	jobTitle String
+    /** 最低薪資 */
+	minSalary Long
+    /** 最高薪資 */
+	maxSalary Long
+}
+
+/** 任職記錄 */
+entity JobHistory {
+	startDate Instant
+	endDate Instant
+    /** 語言 */
+	language Language
+}
+
+/** 語言 */
+enum Language {
+    FRENCH, ENGLISH, SPANISH
+}
+
+relationship OneToOne {
+	Country{region} to Region
+}
+
+relationship OneToOne {
+	Location{country} to Country
+}
+
+relationship OneToOne {
+	Department{location} to Location
+}
+
+relationship ManyToMany {
+	Job{task(title)} to Task{job}
+}
+
+// defining multiple OneToMany relationships with comments
+relationship OneToMany {
+	Employee to Job{employee}
+	/**
+	* A relationship
+	*/
+	Department to
+	/**
+	* Another side of the same relationship
+	*/
+	Employee{department}
+}
+
+relationship ManyToOne {
+	Employee{manager} to Employee
+}
+
+// defining multiple oneToOne relationships
+relationship OneToOne {
+	JobHistory{job} to Job
+	JobHistory{department} to Department
+	JobHistory{employee} to Employee
+}
+
+// Set pagination options
+paginate JobHistory, Employee with infinite-scroll
+paginate Job with pagination
+
+// Use Data Transfer Objects (DTO)
+dto * with mapstruct
+
+// Set service options to all except few
+service all with serviceImpl except Employee, Job
+
+// Set an angular suffix
+// angularSuffix * with mySuffix
