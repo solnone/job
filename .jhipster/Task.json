@@ -1,0 +1,32 @@
+{
+  "annotations": {
+    "changelogDate": "20240418064222"
+  },
+  "applications": "*",
+  "documentation": "任務",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "任務名稱",
+      "fieldName": "title",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "任務描述",
+      "fieldName": "description",
+      "fieldType": "String"
+    }
+  ],
+  "name": "Task",
+  "relationships": [
+    {
+      "otherEntityName": "job",
+      "otherEntityRelationshipName": "task",
+      "relationshipName": "job",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-many"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

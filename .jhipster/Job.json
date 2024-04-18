@@ -1,0 +1,45 @@
+{
+  "annotations": {
+    "changelogDate": "20240418064224"
+  },
+  "applications": "*",
+  "documentation": "職位",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "職稱",
+      "fieldName": "jobTitle",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "最低薪資",
+      "fieldName": "minSalary",
+      "fieldType": "Long"
+    },
+    {
+      "documentation": "最高薪資",
+      "fieldName": "maxSalary",
+      "fieldType": "Long"
+    }
+  ],
+  "name": "Job",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "title",
+      "otherEntityName": "task",
+      "otherEntityRelationshipName": "job",
+      "relationshipName": "task",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-many"
+    },
+    {
+      "otherEntityName": "employee",
+      "relationshipName": "employee",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

@@ -50,6 +50,18 @@ public class CacheConfiguration {
             createCache(cm, io.solnone.job.domain.User.class.getName());
             createCache(cm, io.solnone.job.domain.Authority.class.getName());
             createCache(cm, io.solnone.job.domain.User.class.getName() + ".authorities");
+            createCache(cm, io.solnone.job.domain.Region.class.getName());
+            createCache(cm, io.solnone.job.domain.Country.class.getName());
+            createCache(cm, io.solnone.job.domain.Location.class.getName());
+            createCache(cm, io.solnone.job.domain.Department.class.getName());
+            createCache(cm, io.solnone.job.domain.Department.class.getName() + ".employees");
+            createCache(cm, io.solnone.job.domain.Task.class.getName());
+            createCache(cm, io.solnone.job.domain.Task.class.getName() + ".jobs");
+            createCache(cm, io.solnone.job.domain.Employee.class.getName());
+            createCache(cm, io.solnone.job.domain.Employee.class.getName() + ".jobs");
+            createCache(cm, io.solnone.job.domain.Job.class.getName());
+            createCache(cm, io.solnone.job.domain.Job.class.getName() + ".tasks");
+            createCache(cm, io.solnone.job.domain.JobHistory.class.getName());
             // jhipster-needle-ehcache-add-entry
         };
     }

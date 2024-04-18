@@ -1,0 +1,72 @@
+{
+  "annotations": {
+    "changelogDate": "20240418064223",
+    "dto": "mapstruct"
+  },
+  "applications": "*",
+  "documentation": "員工",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "名字",
+      "fieldName": "firstName",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "姓氏",
+      "fieldName": "lastName",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "電子郵件地址",
+      "fieldName": "email",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "電話號碼",
+      "fieldName": "phoneNumber",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "雇用日期",
+      "fieldName": "hireDate",
+      "fieldType": "Instant"
+    },
+    {
+      "documentation": "薪資",
+      "fieldName": "salary",
+      "fieldType": "Long"
+    },
+    {
+      "documentation": "佣金百分比",
+      "fieldName": "commissionPct",
+      "fieldType": "Long"
+    }
+  ],
+  "name": "Employee",
+  "pagination": "infinite-scroll",
+  "relationships": [
+    {
+      "otherEntityName": "job",
+      "otherEntityRelationshipName": "employee",
+      "relationshipName": "job",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "employee",
+      "relationshipName": "manager",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "documentation": "Another side of the same relationship",
+      "otherEntityName": "department",
+      "relationshipName": "department",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

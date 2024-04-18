@@ -1,0 +1,84 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (employee()) {
+      <div>
+        <h2 data-cy="employeeDetailsHeading"><span jhiTranslate="jobApp.employee.detail.title">Employee</span></h2>
+
+        <hr />
+
+        <jhi-alert-error></jhi-alert-error>
+
+        <jhi-alert></jhi-alert>
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ employee()!.id }}</span>
+          </dd>
+          <dt>
+            <span [ngbTooltip]="'jobApp.employee.help.firstName' | translate" jhiTranslate="jobApp.employee.firstName">First Name</span>
+          </dt>
+          <dd>
+            <span>{{ employee()!.firstName }}</span>
+          </dd>
+          <dt><span [ngbTooltip]="'jobApp.employee.help.lastName' | translate" jhiTranslate="jobApp.employee.lastName">Last Name</span></dt>
+          <dd>
+            <span>{{ employee()!.lastName }}</span>
+          </dd>
+          <dt><span [ngbTooltip]="'jobApp.employee.help.email' | translate" jhiTranslate="jobApp.employee.email">Email</span></dt>
+          <dd>
+            <span>{{ employee()!.email }}</span>
+          </dd>
+          <dt>
+            <span [ngbTooltip]="'jobApp.employee.help.phoneNumber' | translate" jhiTranslate="jobApp.employee.phoneNumber"
+              >Phone Number</span
+            >
+          </dt>
+          <dd>
+            <span>{{ employee()!.phoneNumber }}</span>
+          </dd>
+          <dt><span [ngbTooltip]="'jobApp.employee.help.hireDate' | translate" jhiTranslate="jobApp.employee.hireDate">Hire Date</span></dt>
+          <dd>
+            <span>{{ employee()!.hireDate | formatMediumDatetime }}</span>
+          </dd>
+          <dt><span [ngbTooltip]="'jobApp.employee.help.salary' | translate" jhiTranslate="jobApp.employee.salary">Salary</span></dt>
+          <dd>
+            <span>{{ employee()!.salary }}</span>
+          </dd>
+          <dt>
+            <span [ngbTooltip]="'jobApp.employee.help.commissionPct' | translate" jhiTranslate="jobApp.employee.commissionPct"
+              >Commission Pct</span
+            >
+          </dt>
+          <dd>
+            <span>{{ employee()!.commissionPct }}</span>
+          </dd>
+          <dt><span jhiTranslate="jobApp.employee.manager">Manager</span></dt>
+          <dd>
+            @if (employee()!.manager) {
+              <div>
+                <a [routerLink]="['/employee', employee()!.manager?.id, 'view']">{{ employee()!.manager?.id }}</a>
+              </div>
+            }
+          </dd>
+          <dt><span jhiTranslate="jobApp.employee.department">Department</span></dt>
+          <dd>
+            @if (employee()!.department) {
+              <div>
+                <a [routerLink]="['/department', employee()!.department?.id, 'view']">{{ employee()!.department?.id }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/employee', employee()!.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>
