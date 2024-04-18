@@ -1,0 +1,19 @@
+{
+  "annotations": {
+    "changelogDate": "20240418064218"
+  },
+  "applications": "*",
+  "documentation": "地理區劃",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "區域名稱",
+      "fieldName": "regionName",
+      "fieldType": "String"
+    }
+  ],
+  "name": "Region",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

@@ -1,0 +1,41 @@
+{
+  "annotations": {
+    "changelogDate": "20240418064220"
+  },
+  "applications": "*",
+  "documentation": "地址",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "街道地址",
+      "fieldName": "streetAddress",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "郵遞區號",
+      "fieldName": "postalCode",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "城市",
+      "fieldName": "city",
+      "fieldType": "String"
+    },
+    {
+      "documentation": "州或省",
+      "fieldName": "stateProvince",
+      "fieldType": "String"
+    }
+  ],
+  "name": "Location",
+  "relationships": [
+    {
+      "otherEntityName": "country",
+      "relationshipName": "country",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}
