@@ -3,12 +3,7 @@ package io.solnone.job.service.impl;
 import io.solnone.job.domain.Task;
 import io.solnone.job.repository.TaskRepository;
 import io.solnone.job.service.TaskService;
-import io.solnone.job.service.dto.TaskDTO;
-import io.solnone.job.service.mapper.TaskMapper;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,56 +20,46 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
 
-    private final TaskMapper taskMapper;
-
-    public TaskServiceImpl(TaskRepository taskRepository, TaskMapper taskMapper) {
+    public TaskServiceImpl(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
-        this.taskMapper = taskMapper;
     }
 
     @Override
-    public TaskDTO save(TaskDTO taskDTO) {
-        log.debug("Request to save Task : {}", taskDTO);
-        Task task = taskMapper.toEntity(taskDTO);
-        task = taskRepository.save(task);
-        return taskMapper.toDto(task);
+    public Task save(Task task) {
+        log.debug("Request to save Task : {}", task);
+        return taskRepository.save(task);
     }
 
     @Override
-    public TaskDTO update(TaskDTO taskDTO) {
-        log.debug("Request to update Task : {}", taskDTO);
-        Task task = taskMapper.toEntity(taskDTO);
-        task = taskRepository.save(task);
-        return taskMapper.toDto(task);
+    public Task update(Task task) {
+        log.debug("Request to update Task : {}", task);
+        return taskRepository.save(task);
     }
 
     @Override
-    public Optional<TaskDTO> partialUpdate(TaskDTO taskDTO) {
-        log.debug("Request to partially update Task : {}", taskDTO);
+    public Optional<Task> partialUpdate(Task task) {
+        log.debug("Request to partially update Task : {}", task);
 
         return taskRepository
-            .findById(taskDTO.getId())
+            .findById(task.getId())
             .map(existingTask -> {
-                taskMapper.partialUpdate(existingTask, taskDTO);
+                if (task.getTitle() != null) {
+                    existingTask.setTitle(task.getTitle());
+                }
+                if (task.getDescription() != null) {
+                    existingTask.setDescription(task.getDescription());
+                }
 
                 return existingTask;
             })
-            .map(taskRepository::save)
-            .map(taskMapper::toDto);
+            .map(taskRepository::save);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<TaskDTO> findAll() {
-        log.debug("Request to get all Tasks");
-        return taskRepository.findAll().stream().map(taskMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<TaskDTO> findOne(Long id) {
+    public Optional<Task> findOne(Long id) {
         log.debug("Request to get Task : {}", id);
-        return taskRepository.findById(id).map(taskMapper::toDto);
+        return taskRepository.findById(id);
     }
 
     @Override

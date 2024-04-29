@@ -1,9 +1,7 @@
 package io.solnone.job.service;
 
-import io.solnone.job.service.dto.JobHistoryDTO;
+import io.solnone.job.domain.JobHistory;
 import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 /**
  * Service Interface for managing {@link io.solnone.job.domain.JobHistory}.
@@ -12,34 +10,26 @@ public interface JobHistoryService {
     /**
      * Save a jobHistory.
      *
-     * @param jobHistoryDTO the entity to save.
+     * @param jobHistory the entity to save.
      * @return the persisted entity.
      */
-    JobHistoryDTO save(JobHistoryDTO jobHistoryDTO);
+    JobHistory save(JobHistory jobHistory);
 
     /**
      * Updates a jobHistory.
      *
-     * @param jobHistoryDTO the entity to update.
+     * @param jobHistory the entity to update.
      * @return the persisted entity.
      */
-    JobHistoryDTO update(JobHistoryDTO jobHistoryDTO);
+    JobHistory update(JobHistory jobHistory);
 
     /**
      * Partially updates a jobHistory.
      *
-     * @param jobHistoryDTO the entity to update partially.
+     * @param jobHistory the entity to update partially.
      * @return the persisted entity.
      */
-    Optional<JobHistoryDTO> partialUpdate(JobHistoryDTO jobHistoryDTO);
-
-    /**
-     * Get all the jobHistories.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
-     */
-    Page<JobHistoryDTO> findAll(Pageable pageable);
+    Optional<JobHistory> partialUpdate(JobHistory jobHistory);
 
     /**
      * Get the "id" jobHistory.
@@ -47,7 +37,7 @@ public interface JobHistoryService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<JobHistoryDTO> findOne(Long id);
+    Optional<JobHistory> findOne(Long id);
 
     /**
      * Delete the "id" jobHistory.

@@ -4,7 +4,6 @@
   },
   "applications": "*",
   "documentation": "任務",
-  "dto": "mapstruct",
   "fields": [
     {
       "documentation": "任務名稱",
@@ -17,6 +16,7 @@
       "fieldType": "String"
     }
   ],
+  "jpaMetamodelFiltering": true,
   "name": "Task",
   "relationships": [
     {

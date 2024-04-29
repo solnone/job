@@ -4,7 +4,6 @@
   },
   "applications": "*",
   "documentation": "任職記錄",
-  "dto": "mapstruct",
   "fields": [
     {
       "fieldName": "startDate",
@@ -22,6 +21,7 @@
       "fieldValues": "FRENCH,ENGLISH,SPANISH"
     }
   ],
+  "jpaMetamodelFiltering": true,
   "name": "JobHistory",
   "pagination": "infinite-scroll",
   "relationships": [

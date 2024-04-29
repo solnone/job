@@ -1,6 +1,7 @@
 package io.solnone.job.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * 部門
  */
+@Schema(description = "部門")
 @Entity
 @Table(name = "department")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -29,6 +31,7 @@ public class Department implements Serializable {
     /**
      * 部門名稱
      */
+    @Schema(description = "部門名稱", required = true)
     @NotNull
     @Column(name = "department_name", nullable = false)
     private String departmentName;

@@ -4,7 +4,6 @@
   },
   "applications": "*",
   "documentation": "地理區劃",
-  "dto": "mapstruct",
   "fields": [
     {
       "documentation": "區域名稱",
@@ -12,6 +11,7 @@
       "fieldType": "String"
     }
   ],
+  "jpaMetamodelFiltering": true,
   "name": "Region",
   "relationships": [],
   "searchEngine": "no",

@@ -1,11 +1,9 @@
 {
   "annotations": {
-    "changelogDate": "20240418064223",
-    "dto": "mapstruct"
+    "changelogDate": "20240418064223"
   },
   "applications": "*",
   "documentation": "員工",
-  "dto": "mapstruct",
   "fields": [
     {
       "documentation": "名字",
@@ -43,6 +41,7 @@
       "fieldType": "Long"
     }
   ],
+  "jpaMetamodelFiltering": true,
   "name": "Employee",
   "pagination": "infinite-scroll",
   "relationships": [

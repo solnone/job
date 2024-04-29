@@ -1,6 +1,7 @@
 package io.solnone.job.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import org.hibernate.annotations.Cache;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * 地址
  */
+@Schema(description = "地址")
 @Entity
 @Table(name = "location")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -26,24 +28,28 @@ public class Location implements Serializable {
     /**
      * 街道地址
      */
+    @Schema(description = "街道地址")
     @Column(name = "street_address")
     private String streetAddress;
 
     /**
      * 郵遞區號
      */
+    @Schema(description = "郵遞區號")
     @Column(name = "postal_code")
     private String postalCode;
 
     /**
      * 城市
      */
+    @Schema(description = "城市")
     @Column(name = "city")
     private String city;
 
     /**
      * 州或省
      */
+    @Schema(description = "州或省")
     @Column(name = "state_province")
     private String stateProvince;
 

@@ -1,6 +1,6 @@
 package io.solnone.job.service;
 
-import io.solnone.job.service.dto.LocationDTO;
+import io.solnone.job.domain.Location;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,40 +11,33 @@ public interface LocationService {
     /**
      * Save a location.
      *
-     * @param locationDTO the entity to save.
+     * @param location the entity to save.
      * @return the persisted entity.
      */
-    LocationDTO save(LocationDTO locationDTO);
+    Location save(Location location);
 
     /**
      * Updates a location.
      *
-     * @param locationDTO the entity to update.
+     * @param location the entity to update.
      * @return the persisted entity.
      */
-    LocationDTO update(LocationDTO locationDTO);
+    Location update(Location location);
 
     /**
      * Partially updates a location.
      *
-     * @param locationDTO the entity to update partially.
+     * @param location the entity to update partially.
      * @return the persisted entity.
      */
-    Optional<LocationDTO> partialUpdate(LocationDTO locationDTO);
+    Optional<Location> partialUpdate(Location location);
 
     /**
-     * Get all the locations.
-     *
-     * @return the list of entities.
-     */
-    List<LocationDTO> findAll();
-
-    /**
-     * Get all the LocationDTO where Department is {@code null}.
+     * Get all the Location where Department is {@code null}.
      *
      * @return the {@link List} of entities.
      */
-    List<LocationDTO> findAllWhereDepartmentIsNull();
+    List<Location> findAllWhereDepartmentIsNull();
 
     /**
      * Get the "id" location.
@@ -52,7 +45,7 @@ public interface LocationService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<LocationDTO> findOne(Long id);
+    Optional<Location> findOne(Long id);
 
     /**
      * Delete the "id" location.

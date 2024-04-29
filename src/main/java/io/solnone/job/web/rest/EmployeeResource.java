@@ -1,8 +1,10 @@
 package io.solnone.job.web.rest;
 
+import io.solnone.job.domain.Employee;
 import io.solnone.job.repository.EmployeeRepository;
+import io.solnone.job.service.EmployeeQueryService;
 import io.solnone.job.service.EmployeeService;
-import io.solnone.job.service.dto.EmployeeDTO;
+import io.solnone.job.service.criteria.EmployeeCriteria;
 import io.solnone.job.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -41,50 +42,57 @@ public class EmployeeResource {
 
     private final EmployeeRepository employeeRepository;
 
-    public EmployeeResource(EmployeeService employeeService, EmployeeRepository employeeRepository) {
+    private final EmployeeQueryService employeeQueryService;
+
+    public EmployeeResource(
+        EmployeeService employeeService,
+        EmployeeRepository employeeRepository,
+        EmployeeQueryService employeeQueryService
+    ) {
         this.employeeService = employeeService;
         this.employeeRepository = employeeRepository;
+        this.employeeQueryService = employeeQueryService;
     }
 
     /**
      * {@code POST  /employees} : Create a new employee.
      *
-     * @param employeeDTO the employeeDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new employeeDTO, or with status {@code 400 (Bad Request)} if the employee has already an ID.
+     * @param employee the employee to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new employee, or with status {@code 400 (Bad Request)} if the employee has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    public ResponseEntity<EmployeeDTO> createEmployee(@RequestBody EmployeeDTO employeeDTO) throws URISyntaxException {
-        log.debug("REST request to save Employee : {}", employeeDTO);
-        if (employeeDTO.getId() != null) {
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) throws URISyntaxException {
+        log.debug("REST request to save Employee : {}", employee);
+        if (employee.getId() != null) {
             throw new BadRequestAlertException("A new employee cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        employeeDTO = employeeService.save(employeeDTO);
-        return ResponseEntity.created(new URI("/api/employees/" + employeeDTO.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, employeeDTO.getId().toString()))
-            .body(employeeDTO);
+        employee = employeeService.save(employee);
+        return ResponseEntity.created(new URI("/api/employees/" + employee.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, employee.getId().toString()))
+            .body(employee);
     }
 
     /**
      * {@code PUT  /employees/:id} : Updates an existing employee.
      *
-     * @param id the id of the employeeDTO to save.
-     * @param employeeDTO the employeeDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated employeeDTO,
-     * or with status {@code 400 (Bad Request)} if the employeeDTO is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the employeeDTO couldn't be updated.
+     * @param id the id of the employee to save.
+     * @param employee the employee to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated employee,
+     * or with status {@code 400 (Bad Request)} if the employee is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the employee couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeDTO> updateEmployee(
+    public ResponseEntity<Employee> updateEmployee(
         @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody EmployeeDTO employeeDTO
+        @RequestBody Employee employee
     ) throws URISyntaxException {
-        log.debug("REST request to update Employee : {}, {}", id, employeeDTO);
-        if (employeeDTO.getId() == null) {
+        log.debug("REST request to update Employee : {}, {}", id, employee);
+        if (employee.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, employeeDTO.getId())) {
+        if (!Objects.equals(id, employee.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -92,33 +100,33 @@ public class EmployeeResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        employeeDTO = employeeService.update(employeeDTO);
+        employee = employeeService.update(employee);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, employeeDTO.getId().toString()))
-            .body(employeeDTO);
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, employee.getId().toString()))
+            .body(employee);
     }
 
     /**
      * {@code PATCH  /employees/:id} : Partial updates given fields of an existing employee, field will ignore if it is null
      *
-     * @param id the id of the employeeDTO to save.
-     * @param employeeDTO the employeeDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated employeeDTO,
-     * or with status {@code 400 (Bad Request)} if the employeeDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the employeeDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the employeeDTO couldn't be updated.
+     * @param id the id of the employee to save.
+     * @param employee the employee to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated employee,
+     * or with status {@code 400 (Bad Request)} if the employee is not valid,
+     * or with status {@code 404 (Not Found)} if the employee is not found,
+     * or with status {@code 500 (Internal Server Error)} if the employee couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<EmployeeDTO> partialUpdateEmployee(
+    public ResponseEntity<Employee> partialUpdateEmployee(
         @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody EmployeeDTO employeeDTO
+        @RequestBody Employee employee
     ) throws URISyntaxException {
-        log.debug("REST request to partial update Employee partially : {}, {}", id, employeeDTO);
-        if (employeeDTO.getId() == null) {
+        log.debug("REST request to partial update Employee partially : {}, {}", id, employee);
+        if (employee.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, employeeDTO.getId())) {
+        if (!Objects.equals(id, employee.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -126,11 +134,11 @@ public class EmployeeResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<EmployeeDTO> result = employeeService.partialUpdate(employeeDTO);
+        Optional<Employee> result = employeeService.partialUpdate(employee);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, employeeDTO.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, employee.getId().toString())
         );
     }
 
@@ -138,41 +146,50 @@ public class EmployeeResource {
      * {@code GET  /employees} : get all the employees.
      *
      * @param pageable the pagination information.
-     * @param filter the filter of the request.
+     * @param criteria the criteria which the requested entities should match.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of employees in body.
      */
     @GetMapping("")
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees(
-        @org.springdoc.core.annotations.ParameterObject Pageable pageable,
-        @RequestParam(name = "filter", required = false) String filter
+    public ResponseEntity<List<Employee>> getAllEmployees(
+        EmployeeCriteria criteria,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
-        if ("jobhistory-is-null".equals(filter)) {
-            log.debug("REST request to get all Employees where jobHistory is null");
-            return new ResponseEntity<>(employeeService.findAllWhereJobHistoryIsNull(), HttpStatus.OK);
-        }
-        log.debug("REST request to get a page of Employees");
-        Page<EmployeeDTO> page = employeeService.findAll(pageable);
+        log.debug("REST request to get Employees by criteria: {}", criteria);
+
+        Page<Employee> page = employeeQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**
+     * {@code GET  /employees/count} : count all the employees.
+     *
+     * @param criteria the criteria which the requested entities should match.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
+     */
+    @GetMapping("/count")
+    public ResponseEntity<Long> countEmployees(EmployeeCriteria criteria) {
+        log.debug("REST request to count Employees by criteria: {}", criteria);
+        return ResponseEntity.ok().body(employeeQueryService.countByCriteria(criteria));
+    }
+
+    /**
      * {@code GET  /employees/:id} : get the "id" employee.
      *
-     * @param id the id of the employeeDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the employeeDTO, or with status {@code 404 (Not Found)}.
+     * @param id the id of the employee to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the employee, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDTO> getEmployee(@PathVariable("id") Long id) {
+    public ResponseEntity<Employee> getEmployee(@PathVariable("id") Long id) {
         log.debug("REST request to get Employee : {}", id);
-        Optional<EmployeeDTO> employeeDTO = employeeService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(employeeDTO);
+        Optional<Employee> employee = employeeService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(employee);
     }
 
     /**
      * {@code DELETE  /employees/:id} : delete the "id" employee.
      *
-     * @param id the id of the employeeDTO to delete.
+     * @param id the id of the employee to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")

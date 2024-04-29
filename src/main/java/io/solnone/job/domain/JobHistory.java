@@ -2,6 +2,7 @@ package io.solnone.job.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.solnone.job.domain.enumeration.Language;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.Instant;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * 任職記錄
  */
+@Schema(description = "任職記錄")
 @Entity
 @Table(name = "job_history")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -34,6 +36,7 @@ public class JobHistory implements Serializable {
     /**
      * 語言
      */
+    @Schema(description = "語言")
     @Enumerated(EnumType.STRING)
     @Column(name = "language")
     private Language language;

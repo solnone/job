@@ -9,9 +9,9 @@ export interface IJobHistory {
   startDate?: dayjs.Dayjs | null;
   endDate?: dayjs.Dayjs | null;
   language?: keyof typeof Language | null;
-  job?: Pick<IJob, 'id'> | null;
-  department?: Pick<IDepartment, 'id'> | null;
-  employee?: Pick<IEmployee, 'id'> | null;
+  job?: IJob | null;
+  department?: IDepartment | null;
+  employee?: IEmployee | null;
 }
 
 export type NewJobHistory = Omit<IJobHistory, 'id'> & { id: null };

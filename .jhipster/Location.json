@@ -4,7 +4,6 @@
   },
   "applications": "*",
   "documentation": "地址",
-  "dto": "mapstruct",
   "fields": [
     {
       "documentation": "街道地址",
@@ -27,6 +26,7 @@
       "fieldType": "String"
     }
   ],
+  "jpaMetamodelFiltering": true,
   "name": "Location",
   "relationships": [
     {

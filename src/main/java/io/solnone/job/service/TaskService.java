@@ -1,7 +1,6 @@
 package io.solnone.job.service;
 
-import io.solnone.job.service.dto.TaskDTO;
-import java.util.List;
+import io.solnone.job.domain.Task;
 import java.util.Optional;
 
 /**
@@ -11,33 +10,26 @@ public interface TaskService {
     /**
      * Save a task.
      *
-     * @param taskDTO the entity to save.
+     * @param task the entity to save.
      * @return the persisted entity.
      */
-    TaskDTO save(TaskDTO taskDTO);
+    Task save(Task task);
 
     /**
      * Updates a task.
      *
-     * @param taskDTO the entity to update.
+     * @param task the entity to update.
      * @return the persisted entity.
      */
-    TaskDTO update(TaskDTO taskDTO);
+    Task update(Task task);
 
     /**
      * Partially updates a task.
      *
-     * @param taskDTO the entity to update partially.
+     * @param task the entity to update partially.
      * @return the persisted entity.
      */
-    Optional<TaskDTO> partialUpdate(TaskDTO taskDTO);
-
-    /**
-     * Get all the tasks.
-     *
-     * @return the list of entities.
-     */
-    List<TaskDTO> findAll();
+    Optional<Task> partialUpdate(Task task);
 
     /**
      * Get the "id" task.
@@ -45,7 +37,7 @@ public interface TaskService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<TaskDTO> findOne(Long id);
+    Optional<Task> findOne(Long id);
 
     /**
      * Delete the "id" task.

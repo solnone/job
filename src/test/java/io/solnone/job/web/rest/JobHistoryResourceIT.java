@@ -9,11 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.solnone.job.IntegrationTest;
+import io.solnone.job.domain.Department;
+import io.solnone.job.domain.Employee;
+import io.solnone.job.domain.Job;
 import io.solnone.job.domain.JobHistory;
 import io.solnone.job.domain.enumeration.Language;
 import io.solnone.job.repository.JobHistoryRepository;
-import io.solnone.job.service.dto.JobHistoryDTO;
-import io.solnone.job.service.mapper.JobHistoryMapper;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -58,9 +59,6 @@ class JobHistoryResourceIT {
     private JobHistoryRepository jobHistoryRepository;
 
     @Autowired
-    private JobHistoryMapper jobHistoryMapper;
-
-    @Autowired
     private EntityManager em;
 
     @Autowired
@@ -100,20 +98,18 @@ class JobHistoryResourceIT {
     void createJobHistory() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
         // Create the JobHistory
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(jobHistory);
-        var returnedJobHistoryDTO = om.readValue(
+        var returnedJobHistory = om.readValue(
             restJobHistoryMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobHistoryDTO)))
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobHistory)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
-            JobHistoryDTO.class
+            JobHistory.class
         );
 
         // Validate the JobHistory in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
-        var returnedJobHistory = jobHistoryMapper.toEntity(returnedJobHistoryDTO);
         assertJobHistoryUpdatableFieldsEquals(returnedJobHistory, getPersistedJobHistory(returnedJobHistory));
     }
 
@@ -122,13 +118,12 @@ class JobHistoryResourceIT {
     void createJobHistoryWithExistingId() throws Exception {
         // Create the JobHistory with an existing ID
         jobHistory.setId(1L);
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(jobHistory);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restJobHistoryMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobHistoryDTO)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobHistory)))
             .andExpect(status().isBadRequest());
 
         // Validate the JobHistory in the database
@@ -171,6 +166,222 @@ class JobHistoryResourceIT {
 
     @Test
     @Transactional
+    void getJobHistoriesByIdFiltering() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        Long id = jobHistory.getId();
+
+        defaultJobHistoryFiltering("id.equals=" + id, "id.notEquals=" + id);
+
+        defaultJobHistoryFiltering("id.greaterThanOrEqual=" + id, "id.greaterThan=" + id);
+
+        defaultJobHistoryFiltering("id.lessThanOrEqual=" + id, "id.lessThan=" + id);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByStartDateIsEqualToSomething() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where startDate equals to
+        defaultJobHistoryFiltering("startDate.equals=" + DEFAULT_START_DATE, "startDate.equals=" + UPDATED_START_DATE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByStartDateIsInShouldWork() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where startDate in
+        defaultJobHistoryFiltering("startDate.in=" + DEFAULT_START_DATE + "," + UPDATED_START_DATE, "startDate.in=" + UPDATED_START_DATE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByStartDateIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where startDate is not null
+        defaultJobHistoryFiltering("startDate.specified=true", "startDate.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByEndDateIsEqualToSomething() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where endDate equals to
+        defaultJobHistoryFiltering("endDate.equals=" + DEFAULT_END_DATE, "endDate.equals=" + UPDATED_END_DATE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByEndDateIsInShouldWork() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where endDate in
+        defaultJobHistoryFiltering("endDate.in=" + DEFAULT_END_DATE + "," + UPDATED_END_DATE, "endDate.in=" + UPDATED_END_DATE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByEndDateIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where endDate is not null
+        defaultJobHistoryFiltering("endDate.specified=true", "endDate.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByLanguageIsEqualToSomething() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where language equals to
+        defaultJobHistoryFiltering("language.equals=" + DEFAULT_LANGUAGE, "language.equals=" + UPDATED_LANGUAGE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByLanguageIsInShouldWork() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where language in
+        defaultJobHistoryFiltering("language.in=" + DEFAULT_LANGUAGE + "," + UPDATED_LANGUAGE, "language.in=" + UPDATED_LANGUAGE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByLanguageIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        jobHistoryRepository.saveAndFlush(jobHistory);
+
+        // Get all the jobHistoryList where language is not null
+        defaultJobHistoryFiltering("language.specified=true", "language.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByJobIsEqualToSomething() throws Exception {
+        Job job;
+        if (TestUtil.findAll(em, Job.class).isEmpty()) {
+            jobHistoryRepository.saveAndFlush(jobHistory);
+            job = JobResourceIT.createEntity(em);
+        } else {
+            job = TestUtil.findAll(em, Job.class).get(0);
+        }
+        em.persist(job);
+        em.flush();
+        jobHistory.setJob(job);
+        jobHistoryRepository.saveAndFlush(jobHistory);
+        Long jobId = job.getId();
+        // Get all the jobHistoryList where job equals to jobId
+        defaultJobHistoryShouldBeFound("jobId.equals=" + jobId);
+
+        // Get all the jobHistoryList where job equals to (jobId + 1)
+        defaultJobHistoryShouldNotBeFound("jobId.equals=" + (jobId + 1));
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByDepartmentIsEqualToSomething() throws Exception {
+        Department department;
+        if (TestUtil.findAll(em, Department.class).isEmpty()) {
+            jobHistoryRepository.saveAndFlush(jobHistory);
+            department = DepartmentResourceIT.createEntity(em);
+        } else {
+            department = TestUtil.findAll(em, Department.class).get(0);
+        }
+        em.persist(department);
+        em.flush();
+        jobHistory.setDepartment(department);
+        jobHistoryRepository.saveAndFlush(jobHistory);
+        Long departmentId = department.getId();
+        // Get all the jobHistoryList where department equals to departmentId
+        defaultJobHistoryShouldBeFound("departmentId.equals=" + departmentId);
+
+        // Get all the jobHistoryList where department equals to (departmentId + 1)
+        defaultJobHistoryShouldNotBeFound("departmentId.equals=" + (departmentId + 1));
+    }
+
+    @Test
+    @Transactional
+    void getAllJobHistoriesByEmployeeIsEqualToSomething() throws Exception {
+        Employee employee;
+        if (TestUtil.findAll(em, Employee.class).isEmpty()) {
+            jobHistoryRepository.saveAndFlush(jobHistory);
+            employee = EmployeeResourceIT.createEntity(em);
+        } else {
+            employee = TestUtil.findAll(em, Employee.class).get(0);
+        }
+        em.persist(employee);
+        em.flush();
+        jobHistory.setEmployee(employee);
+        jobHistoryRepository.saveAndFlush(jobHistory);
+        Long employeeId = employee.getId();
+        // Get all the jobHistoryList where employee equals to employeeId
+        defaultJobHistoryShouldBeFound("employeeId.equals=" + employeeId);
+
+        // Get all the jobHistoryList where employee equals to (employeeId + 1)
+        defaultJobHistoryShouldNotBeFound("employeeId.equals=" + (employeeId + 1));
+    }
+
+    private void defaultJobHistoryFiltering(String shouldBeFound, String shouldNotBeFound) throws Exception {
+        defaultJobHistoryShouldBeFound(shouldBeFound);
+        defaultJobHistoryShouldNotBeFound(shouldNotBeFound);
+    }
+
+    /**
+     * Executes the search, and checks that the default entity is returned.
+     */
+    private void defaultJobHistoryShouldBeFound(String filter) throws Exception {
+        restJobHistoryMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(jobHistory.getId().intValue())))
+            .andExpect(jsonPath("$.[*].startDate").value(hasItem(DEFAULT_START_DATE.toString())))
+            .andExpect(jsonPath("$.[*].endDate").value(hasItem(DEFAULT_END_DATE.toString())))
+            .andExpect(jsonPath("$.[*].language").value(hasItem(DEFAULT_LANGUAGE.toString())));
+
+        // Check, that the count call also returns 1
+        restJobHistoryMockMvc
+            .perform(get(ENTITY_API_URL + "/count?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().string("1"));
+    }
+
+    /**
+     * Executes the search, and checks that the default entity is not returned.
+     */
+    private void defaultJobHistoryShouldNotBeFound(String filter) throws Exception {
+        restJobHistoryMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
+
+        // Check, that the count call also returns 0
+        restJobHistoryMockMvc
+            .perform(get(ENTITY_API_URL + "/count?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().string("0"));
+    }
+
+    @Test
+    @Transactional
     void getNonExistingJobHistory() throws Exception {
         // Get the jobHistory
         restJobHistoryMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
@@ -189,13 +400,12 @@ class JobHistoryResourceIT {
         // Disconnect from session so that the updates on updatedJobHistory are not directly saved in db
         em.detach(updatedJobHistory);
         updatedJobHistory.startDate(UPDATED_START_DATE).endDate(UPDATED_END_DATE).language(UPDATED_LANGUAGE);
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(updatedJobHistory);
 
         restJobHistoryMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, jobHistoryDTO.getId())
+                put(ENTITY_API_URL_ID, updatedJobHistory.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(jobHistoryDTO))
+                    .content(om.writeValueAsBytes(updatedJobHistory))
             )
             .andExpect(status().isOk());
 
@@ -210,15 +420,10 @@ class JobHistoryResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         jobHistory.setId(longCount.incrementAndGet());
 
-        // Create the JobHistory
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(jobHistory);
-
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restJobHistoryMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, jobHistoryDTO.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(jobHistoryDTO))
+                put(ENTITY_API_URL_ID, jobHistory.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobHistory))
             )
             .andExpect(status().isBadRequest());
 
@@ -232,15 +437,12 @@ class JobHistoryResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         jobHistory.setId(longCount.incrementAndGet());
 
-        // Create the JobHistory
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(jobHistory);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restJobHistoryMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, longCount.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(jobHistoryDTO))
+                    .content(om.writeValueAsBytes(jobHistory))
             )
             .andExpect(status().isBadRequest());
 
@@ -254,12 +456,9 @@ class JobHistoryResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         jobHistory.setId(longCount.incrementAndGet());
 
-        // Create the JobHistory
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(jobHistory);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restJobHistoryMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobHistoryDTO)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobHistory)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the JobHistory in the database
@@ -331,15 +530,12 @@ class JobHistoryResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         jobHistory.setId(longCount.incrementAndGet());
 
-        // Create the JobHistory
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(jobHistory);
-
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restJobHistoryMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, jobHistoryDTO.getId())
+                patch(ENTITY_API_URL_ID, jobHistory.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(jobHistoryDTO))
+                    .content(om.writeValueAsBytes(jobHistory))
             )
             .andExpect(status().isBadRequest());
 
@@ -353,15 +549,12 @@ class JobHistoryResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         jobHistory.setId(longCount.incrementAndGet());
 
-        // Create the JobHistory
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(jobHistory);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restJobHistoryMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, longCount.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(jobHistoryDTO))
+                    .content(om.writeValueAsBytes(jobHistory))
             )
             .andExpect(status().isBadRequest());
 
@@ -375,12 +568,9 @@ class JobHistoryResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         jobHistory.setId(longCount.incrementAndGet());
 
-        // Create the JobHistory
-        JobHistoryDTO jobHistoryDTO = jobHistoryMapper.toDto(jobHistory);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restJobHistoryMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(jobHistoryDTO)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(jobHistory)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the JobHistory in the database

@@ -88,7 +88,7 @@ export class LocationUpdateComponent implements OnInit {
 
   protected loadRelationshipsOptions(): void {
     this.countryService
-      .query({ filter: 'location-is-null' })
+      .query({ 'locationId.specified': 'false' })
       .pipe(map((res: HttpResponse<ICountry[]>) => res.body ?? []))
       .pipe(
         map((countries: ICountry[]) => this.countryService.addCountryToCollectionIfMissing<ICountry>(countries, this.location?.country)),

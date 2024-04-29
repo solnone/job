@@ -88,7 +88,7 @@ export class CountryUpdateComponent implements OnInit {
 
   protected loadRelationshipsOptions(): void {
     this.regionService
-      .query({ filter: 'country-is-null' })
+      .query({ 'countryId.specified': 'false' })
       .pipe(map((res: HttpResponse<IRegion[]>) => res.body ?? []))
       .pipe(map((regions: IRegion[]) => this.regionService.addRegionToCollectionIfMissing<IRegion>(regions, this.country?.region)))
       .subscribe((regions: IRegion[]) => (this.regionsCollection = regions));

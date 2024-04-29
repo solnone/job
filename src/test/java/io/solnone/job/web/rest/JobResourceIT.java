@@ -10,11 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.solnone.job.IntegrationTest;
+import io.solnone.job.domain.Employee;
 import io.solnone.job.domain.Job;
+import io.solnone.job.domain.Task;
 import io.solnone.job.repository.JobRepository;
 import io.solnone.job.service.JobService;
-import io.solnone.job.service.dto.JobDTO;
-import io.solnone.job.service.mapper.JobMapper;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Random;
@@ -47,9 +47,11 @@ class JobResourceIT {
 
     private static final Long DEFAULT_MIN_SALARY = 1L;
     private static final Long UPDATED_MIN_SALARY = 2L;
+    private static final Long SMALLER_MIN_SALARY = 1L - 1L;
 
     private static final Long DEFAULT_MAX_SALARY = 1L;
     private static final Long UPDATED_MAX_SALARY = 2L;
+    private static final Long SMALLER_MAX_SALARY = 1L - 1L;
 
     private static final String ENTITY_API_URL = "/api/jobs";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
@@ -65,9 +67,6 @@ class JobResourceIT {
 
     @Mock
     private JobRepository jobRepositoryMock;
-
-    @Autowired
-    private JobMapper jobMapper;
 
     @Mock
     private JobService jobServiceMock;
@@ -112,20 +111,18 @@ class JobResourceIT {
     void createJob() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
         // Create the Job
-        JobDTO jobDTO = jobMapper.toDto(job);
-        var returnedJobDTO = om.readValue(
+        var returnedJob = om.readValue(
             restJobMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobDTO)))
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(job)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
-            JobDTO.class
+            Job.class
         );
 
         // Validate the Job in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
-        var returnedJob = jobMapper.toEntity(returnedJobDTO);
         assertJobUpdatableFieldsEquals(returnedJob, getPersistedJob(returnedJob));
     }
 
@@ -134,13 +131,12 @@ class JobResourceIT {
     void createJobWithExistingId() throws Exception {
         // Create the Job with an existing ID
         job.setId(1L);
-        JobDTO jobDTO = jobMapper.toDto(job);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restJobMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobDTO)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(job)))
             .andExpect(status().isBadRequest());
 
         // Validate the Job in the database
@@ -200,6 +196,300 @@ class JobResourceIT {
 
     @Test
     @Transactional
+    void getJobsByIdFiltering() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        Long id = job.getId();
+
+        defaultJobFiltering("id.equals=" + id, "id.notEquals=" + id);
+
+        defaultJobFiltering("id.greaterThanOrEqual=" + id, "id.greaterThan=" + id);
+
+        defaultJobFiltering("id.lessThanOrEqual=" + id, "id.lessThan=" + id);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByJobTitleIsEqualToSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where jobTitle equals to
+        defaultJobFiltering("jobTitle.equals=" + DEFAULT_JOB_TITLE, "jobTitle.equals=" + UPDATED_JOB_TITLE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByJobTitleIsInShouldWork() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where jobTitle in
+        defaultJobFiltering("jobTitle.in=" + DEFAULT_JOB_TITLE + "," + UPDATED_JOB_TITLE, "jobTitle.in=" + UPDATED_JOB_TITLE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByJobTitleIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where jobTitle is not null
+        defaultJobFiltering("jobTitle.specified=true", "jobTitle.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByJobTitleContainsSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where jobTitle contains
+        defaultJobFiltering("jobTitle.contains=" + DEFAULT_JOB_TITLE, "jobTitle.contains=" + UPDATED_JOB_TITLE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByJobTitleNotContainsSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where jobTitle does not contain
+        defaultJobFiltering("jobTitle.doesNotContain=" + UPDATED_JOB_TITLE, "jobTitle.doesNotContain=" + DEFAULT_JOB_TITLE);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMinSalaryIsEqualToSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where minSalary equals to
+        defaultJobFiltering("minSalary.equals=" + DEFAULT_MIN_SALARY, "minSalary.equals=" + UPDATED_MIN_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMinSalaryIsInShouldWork() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where minSalary in
+        defaultJobFiltering("minSalary.in=" + DEFAULT_MIN_SALARY + "," + UPDATED_MIN_SALARY, "minSalary.in=" + UPDATED_MIN_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMinSalaryIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where minSalary is not null
+        defaultJobFiltering("minSalary.specified=true", "minSalary.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMinSalaryIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where minSalary is greater than or equal to
+        defaultJobFiltering("minSalary.greaterThanOrEqual=" + DEFAULT_MIN_SALARY, "minSalary.greaterThanOrEqual=" + UPDATED_MIN_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMinSalaryIsLessThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where minSalary is less than or equal to
+        defaultJobFiltering("minSalary.lessThanOrEqual=" + DEFAULT_MIN_SALARY, "minSalary.lessThanOrEqual=" + SMALLER_MIN_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMinSalaryIsLessThanSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where minSalary is less than
+        defaultJobFiltering("minSalary.lessThan=" + UPDATED_MIN_SALARY, "minSalary.lessThan=" + DEFAULT_MIN_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMinSalaryIsGreaterThanSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where minSalary is greater than
+        defaultJobFiltering("minSalary.greaterThan=" + SMALLER_MIN_SALARY, "minSalary.greaterThan=" + DEFAULT_MIN_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMaxSalaryIsEqualToSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where maxSalary equals to
+        defaultJobFiltering("maxSalary.equals=" + DEFAULT_MAX_SALARY, "maxSalary.equals=" + UPDATED_MAX_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMaxSalaryIsInShouldWork() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where maxSalary in
+        defaultJobFiltering("maxSalary.in=" + DEFAULT_MAX_SALARY + "," + UPDATED_MAX_SALARY, "maxSalary.in=" + UPDATED_MAX_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMaxSalaryIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where maxSalary is not null
+        defaultJobFiltering("maxSalary.specified=true", "maxSalary.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMaxSalaryIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where maxSalary is greater than or equal to
+        defaultJobFiltering("maxSalary.greaterThanOrEqual=" + DEFAULT_MAX_SALARY, "maxSalary.greaterThanOrEqual=" + UPDATED_MAX_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMaxSalaryIsLessThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where maxSalary is less than or equal to
+        defaultJobFiltering("maxSalary.lessThanOrEqual=" + DEFAULT_MAX_SALARY, "maxSalary.lessThanOrEqual=" + SMALLER_MAX_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMaxSalaryIsLessThanSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where maxSalary is less than
+        defaultJobFiltering("maxSalary.lessThan=" + UPDATED_MAX_SALARY, "maxSalary.lessThan=" + DEFAULT_MAX_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByMaxSalaryIsGreaterThanSomething() throws Exception {
+        // Initialize the database
+        jobRepository.saveAndFlush(job);
+
+        // Get all the jobList where maxSalary is greater than
+        defaultJobFiltering("maxSalary.greaterThan=" + SMALLER_MAX_SALARY, "maxSalary.greaterThan=" + DEFAULT_MAX_SALARY);
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByTaskIsEqualToSomething() throws Exception {
+        Task task;
+        if (TestUtil.findAll(em, Task.class).isEmpty()) {
+            jobRepository.saveAndFlush(job);
+            task = TaskResourceIT.createEntity(em);
+        } else {
+            task = TestUtil.findAll(em, Task.class).get(0);
+        }
+        em.persist(task);
+        em.flush();
+        job.addTask(task);
+        jobRepository.saveAndFlush(job);
+        Long taskId = task.getId();
+        // Get all the jobList where task equals to taskId
+        defaultJobShouldBeFound("taskId.equals=" + taskId);
+
+        // Get all the jobList where task equals to (taskId + 1)
+        defaultJobShouldNotBeFound("taskId.equals=" + (taskId + 1));
+    }
+
+    @Test
+    @Transactional
+    void getAllJobsByEmployeeIsEqualToSomething() throws Exception {
+        Employee employee;
+        if (TestUtil.findAll(em, Employee.class).isEmpty()) {
+            jobRepository.saveAndFlush(job);
+            employee = EmployeeResourceIT.createEntity(em);
+        } else {
+            employee = TestUtil.findAll(em, Employee.class).get(0);
+        }
+        em.persist(employee);
+        em.flush();
+        job.setEmployee(employee);
+        jobRepository.saveAndFlush(job);
+        Long employeeId = employee.getId();
+        // Get all the jobList where employee equals to employeeId
+        defaultJobShouldBeFound("employeeId.equals=" + employeeId);
+
+        // Get all the jobList where employee equals to (employeeId + 1)
+        defaultJobShouldNotBeFound("employeeId.equals=" + (employeeId + 1));
+    }
+
+    private void defaultJobFiltering(String shouldBeFound, String shouldNotBeFound) throws Exception {
+        defaultJobShouldBeFound(shouldBeFound);
+        defaultJobShouldNotBeFound(shouldNotBeFound);
+    }
+
+    /**
+     * Executes the search, and checks that the default entity is returned.
+     */
+    private void defaultJobShouldBeFound(String filter) throws Exception {
+        restJobMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(job.getId().intValue())))
+            .andExpect(jsonPath("$.[*].jobTitle").value(hasItem(DEFAULT_JOB_TITLE)))
+            .andExpect(jsonPath("$.[*].minSalary").value(hasItem(DEFAULT_MIN_SALARY.intValue())))
+            .andExpect(jsonPath("$.[*].maxSalary").value(hasItem(DEFAULT_MAX_SALARY.intValue())));
+
+        // Check, that the count call also returns 1
+        restJobMockMvc
+            .perform(get(ENTITY_API_URL + "/count?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().string("1"));
+    }
+
+    /**
+     * Executes the search, and checks that the default entity is not returned.
+     */
+    private void defaultJobShouldNotBeFound(String filter) throws Exception {
+        restJobMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
+
+        // Check, that the count call also returns 0
+        restJobMockMvc
+            .perform(get(ENTITY_API_URL + "/count?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().string("0"));
+    }
+
+    @Test
+    @Transactional
     void getNonExistingJob() throws Exception {
         // Get the job
         restJobMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
@@ -218,10 +508,11 @@ class JobResourceIT {
         // Disconnect from session so that the updates on updatedJob are not directly saved in db
         em.detach(updatedJob);
         updatedJob.jobTitle(UPDATED_JOB_TITLE).minSalary(UPDATED_MIN_SALARY).maxSalary(UPDATED_MAX_SALARY);
-        JobDTO jobDTO = jobMapper.toDto(updatedJob);
 
         restJobMockMvc
-            .perform(put(ENTITY_API_URL_ID, jobDTO.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobDTO)))
+            .perform(
+                put(ENTITY_API_URL_ID, updatedJob.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(updatedJob))
+            )
             .andExpect(status().isOk());
 
         // Validate the Job in the database
@@ -235,12 +526,9 @@ class JobResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         job.setId(longCount.incrementAndGet());
 
-        // Create the Job
-        JobDTO jobDTO = jobMapper.toDto(job);
-
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restJobMockMvc
-            .perform(put(ENTITY_API_URL_ID, jobDTO.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobDTO)))
+            .perform(put(ENTITY_API_URL_ID, job.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(job)))
             .andExpect(status().isBadRequest());
 
         // Validate the Job in the database
@@ -253,15 +541,12 @@ class JobResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         job.setId(longCount.incrementAndGet());
 
-        // Create the Job
-        JobDTO jobDTO = jobMapper.toDto(job);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restJobMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, longCount.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(jobDTO))
+                    .content(om.writeValueAsBytes(job))
             )
             .andExpect(status().isBadRequest());
 
@@ -275,12 +560,9 @@ class JobResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         job.setId(longCount.incrementAndGet());
 
-        // Create the Job
-        JobDTO jobDTO = jobMapper.toDto(job);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restJobMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(jobDTO)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(job)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Job in the database
@@ -349,14 +631,9 @@ class JobResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         job.setId(longCount.incrementAndGet());
 
-        // Create the Job
-        JobDTO jobDTO = jobMapper.toDto(job);
-
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restJobMockMvc
-            .perform(
-                patch(ENTITY_API_URL_ID, jobDTO.getId()).contentType("application/merge-patch+json").content(om.writeValueAsBytes(jobDTO))
-            )
+            .perform(patch(ENTITY_API_URL_ID, job.getId()).contentType("application/merge-patch+json").content(om.writeValueAsBytes(job)))
             .andExpect(status().isBadRequest());
 
         // Validate the Job in the database
@@ -369,15 +646,12 @@ class JobResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         job.setId(longCount.incrementAndGet());
 
-        // Create the Job
-        JobDTO jobDTO = jobMapper.toDto(job);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restJobMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, longCount.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(jobDTO))
+                    .content(om.writeValueAsBytes(job))
             )
             .andExpect(status().isBadRequest());
 
@@ -391,12 +665,9 @@ class JobResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         job.setId(longCount.incrementAndGet());
 
-        // Create the Job
-        JobDTO jobDTO = jobMapper.toDto(job);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restJobMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(jobDTO)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(job)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Job in the database

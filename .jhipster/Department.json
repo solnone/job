@@ -4,7 +4,6 @@
   },
   "applications": "*",
   "documentation": "部門",
-  "dto": "mapstruct",
   "fields": [
     {
       "documentation": "部門名稱",
@@ -13,6 +12,7 @@
       "fieldValidateRules": ["required"]
     }
   ],
+  "jpaMetamodelFiltering": true,
   "name": "Department",
   "relationships": [
     {

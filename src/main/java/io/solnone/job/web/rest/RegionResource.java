@@ -1,8 +1,10 @@
 package io.solnone.job.web.rest;
 
+import io.solnone.job.domain.Region;
 import io.solnone.job.repository.RegionRepository;
+import io.solnone.job.service.RegionQueryService;
 import io.solnone.job.service.RegionService;
-import io.solnone.job.service.dto.RegionDTO;
+import io.solnone.job.service.criteria.RegionCriteria;
 import io.solnone.job.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,50 +37,51 @@ public class RegionResource {
 
     private final RegionRepository regionRepository;
 
-    public RegionResource(RegionService regionService, RegionRepository regionRepository) {
+    private final RegionQueryService regionQueryService;
+
+    public RegionResource(RegionService regionService, RegionRepository regionRepository, RegionQueryService regionQueryService) {
         this.regionService = regionService;
         this.regionRepository = regionRepository;
+        this.regionQueryService = regionQueryService;
     }
 
     /**
      * {@code POST  /regions} : Create a new region.
      *
-     * @param regionDTO the regionDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new regionDTO, or with status {@code 400 (Bad Request)} if the region has already an ID.
+     * @param region the region to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new region, or with status {@code 400 (Bad Request)} if the region has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    public ResponseEntity<RegionDTO> createRegion(@RequestBody RegionDTO regionDTO) throws URISyntaxException {
-        log.debug("REST request to save Region : {}", regionDTO);
-        if (regionDTO.getId() != null) {
+    public ResponseEntity<Region> createRegion(@RequestBody Region region) throws URISyntaxException {
+        log.debug("REST request to save Region : {}", region);
+        if (region.getId() != null) {
             throw new BadRequestAlertException("A new region cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        regionDTO = regionService.save(regionDTO);
-        return ResponseEntity.created(new URI("/api/regions/" + regionDTO.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, regionDTO.getId().toString()))
-            .body(regionDTO);
+        region = regionService.save(region);
+        return ResponseEntity.created(new URI("/api/regions/" + region.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, region.getId().toString()))
+            .body(region);
     }
 
     /**
      * {@code PUT  /regions/:id} : Updates an existing region.
      *
-     * @param id the id of the regionDTO to save.
-     * @param regionDTO the regionDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated regionDTO,
-     * or with status {@code 400 (Bad Request)} if the regionDTO is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the regionDTO couldn't be updated.
+     * @param id the id of the region to save.
+     * @param region the region to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated region,
+     * or with status {@code 400 (Bad Request)} if the region is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the region couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<RegionDTO> updateRegion(
-        @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody RegionDTO regionDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to update Region : {}, {}", id, regionDTO);
-        if (regionDTO.getId() == null) {
+    public ResponseEntity<Region> updateRegion(@PathVariable(value = "id", required = false) final Long id, @RequestBody Region region)
+        throws URISyntaxException {
+        log.debug("REST request to update Region : {}, {}", id, region);
+        if (region.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, regionDTO.getId())) {
+        if (!Objects.equals(id, region.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -86,33 +89,33 @@ public class RegionResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        regionDTO = regionService.update(regionDTO);
+        region = regionService.update(region);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, regionDTO.getId().toString()))
-            .body(regionDTO);
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, region.getId().toString()))
+            .body(region);
     }
 
     /**
      * {@code PATCH  /regions/:id} : Partial updates given fields of an existing region, field will ignore if it is null
      *
-     * @param id the id of the regionDTO to save.
-     * @param regionDTO the regionDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated regionDTO,
-     * or with status {@code 400 (Bad Request)} if the regionDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the regionDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the regionDTO couldn't be updated.
+     * @param id the id of the region to save.
+     * @param region the region to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated region,
+     * or with status {@code 400 (Bad Request)} if the region is not valid,
+     * or with status {@code 404 (Not Found)} if the region is not found,
+     * or with status {@code 500 (Internal Server Error)} if the region couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<RegionDTO> partialUpdateRegion(
+    public ResponseEntity<Region> partialUpdateRegion(
         @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody RegionDTO regionDTO
+        @RequestBody Region region
     ) throws URISyntaxException {
-        log.debug("REST request to partial update Region partially : {}, {}", id, regionDTO);
-        if (regionDTO.getId() == null) {
+        log.debug("REST request to partial update Region partially : {}, {}", id, region);
+        if (region.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, regionDTO.getId())) {
+        if (!Objects.equals(id, region.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -120,47 +123,57 @@ public class RegionResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<RegionDTO> result = regionService.partialUpdate(regionDTO);
+        Optional<Region> result = regionService.partialUpdate(region);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, regionDTO.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, region.getId().toString())
         );
     }
 
     /**
      * {@code GET  /regions} : get all the regions.
      *
-     * @param filter the filter of the request.
+     * @param criteria the criteria which the requested entities should match.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of regions in body.
      */
     @GetMapping("")
-    public List<RegionDTO> getAllRegions(@RequestParam(name = "filter", required = false) String filter) {
-        if ("country-is-null".equals(filter)) {
-            log.debug("REST request to get all Regions where country is null");
-            return regionService.findAllWhereCountryIsNull();
-        }
-        log.debug("REST request to get all Regions");
-        return regionService.findAll();
+    public ResponseEntity<List<Region>> getAllRegions(RegionCriteria criteria) {
+        log.debug("REST request to get Regions by criteria: {}", criteria);
+
+        List<Region> entityList = regionQueryService.findByCriteria(criteria);
+        return ResponseEntity.ok().body(entityList);
+    }
+
+    /**
+     * {@code GET  /regions/count} : count all the regions.
+     *
+     * @param criteria the criteria which the requested entities should match.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
+     */
+    @GetMapping("/count")
+    public ResponseEntity<Long> countRegions(RegionCriteria criteria) {
+        log.debug("REST request to count Regions by criteria: {}", criteria);
+        return ResponseEntity.ok().body(regionQueryService.countByCriteria(criteria));
     }
 
     /**
      * {@code GET  /regions/:id} : get the "id" region.
      *
-     * @param id the id of the regionDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the regionDTO, or with status {@code 404 (Not Found)}.
+     * @param id the id of the region to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the region, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<RegionDTO> getRegion(@PathVariable("id") Long id) {
+    public ResponseEntity<Region> getRegion(@PathVariable("id") Long id) {
         log.debug("REST request to get Region : {}", id);
-        Optional<RegionDTO> regionDTO = regionService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(regionDTO);
+        Optional<Region> region = regionService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(region);
     }
 
     /**
      * {@code DELETE  /regions/:id} : delete the "id" region.
      *
-     * @param id the id of the regionDTO to delete.
+     * @param id the id of the region to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")

@@ -1,6 +1,6 @@
 package io.solnone.job.service;
 
-import io.solnone.job.service.dto.DepartmentDTO;
+import io.solnone.job.domain.Department;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,40 +11,33 @@ public interface DepartmentService {
     /**
      * Save a department.
      *
-     * @param departmentDTO the entity to save.
+     * @param department the entity to save.
      * @return the persisted entity.
      */
-    DepartmentDTO save(DepartmentDTO departmentDTO);
+    Department save(Department department);
 
     /**
      * Updates a department.
      *
-     * @param departmentDTO the entity to update.
+     * @param department the entity to update.
      * @return the persisted entity.
      */
-    DepartmentDTO update(DepartmentDTO departmentDTO);
+    Department update(Department department);
 
     /**
      * Partially updates a department.
      *
-     * @param departmentDTO the entity to update partially.
+     * @param department the entity to update partially.
      * @return the persisted entity.
      */
-    Optional<DepartmentDTO> partialUpdate(DepartmentDTO departmentDTO);
+    Optional<Department> partialUpdate(Department department);
 
     /**
-     * Get all the departments.
-     *
-     * @return the list of entities.
-     */
-    List<DepartmentDTO> findAll();
-
-    /**
-     * Get all the DepartmentDTO where JobHistory is {@code null}.
+     * Get all the Department where JobHistory is {@code null}.
      *
      * @return the {@link List} of entities.
      */
-    List<DepartmentDTO> findAllWhereJobHistoryIsNull();
+    List<Department> findAllWhereJobHistoryIsNull();
 
     /**
      * Get the "id" department.
@@ -52,7 +45,7 @@ public interface DepartmentService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<DepartmentDTO> findOne(Long id);
+    Optional<Department> findOne(Long id);
 
     /**
      * Delete the "id" department.

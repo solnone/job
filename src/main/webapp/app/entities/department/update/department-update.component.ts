@@ -91,7 +91,7 @@ export class DepartmentUpdateComponent implements OnInit {
 
   protected loadRelationshipsOptions(): void {
     this.locationService
-      .query({ filter: 'department-is-null' })
+      .query({ 'departmentId.specified': 'false' })
       .pipe(map((res: HttpResponse<ILocation[]>) => res.body ?? []))
       .pipe(
         map((locations: ILocation[]) =>

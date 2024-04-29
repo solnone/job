@@ -1,6 +1,7 @@
 package io.solnone.job.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * 任務
  */
+@Schema(description = "任務")
 @Entity
 @Table(name = "task")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -28,12 +30,14 @@ public class Task implements Serializable {
     /**
      * 任務名稱
      */
+    @Schema(description = "任務名稱")
     @Column(name = "title")
     private String title;
 
     /**
      * 任務描述
      */
+    @Schema(description = "任務描述")
     @Column(name = "description")
     private String description;
 

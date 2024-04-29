@@ -1,6 +1,7 @@
 package io.solnone.job.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.Instant;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * 員工
  */
+@Schema(description = "員工")
 @Entity
 @Table(name = "employee")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -29,42 +31,49 @@ public class Employee implements Serializable {
     /**
      * 名字
      */
+    @Schema(description = "名字")
     @Column(name = "first_name")
     private String firstName;
 
     /**
      * 姓氏
      */
+    @Schema(description = "姓氏")
     @Column(name = "last_name")
     private String lastName;
 
     /**
      * 電子郵件地址
      */
+    @Schema(description = "電子郵件地址")
     @Column(name = "email")
     private String email;
 
     /**
      * 電話號碼
      */
+    @Schema(description = "電話號碼")
     @Column(name = "phone_number")
     private String phoneNumber;
 
     /**
      * 雇用日期
      */
+    @Schema(description = "雇用日期")
     @Column(name = "hire_date")
     private Instant hireDate;
 
     /**
      * 薪資
      */
+    @Schema(description = "薪資")
     @Column(name = "salary")
     private Long salary;
 
     /**
      * 佣金百分比
      */
+    @Schema(description = "佣金百分比")
     @Column(name = "commission_pct")
     private Long commissionPct;
 

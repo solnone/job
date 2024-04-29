@@ -4,7 +4,6 @@
   },
   "applications": "*",
   "documentation": "國家",
-  "dto": "mapstruct",
   "fields": [
     {
       "documentation": "國家名稱",
@@ -12,6 +11,7 @@
       "fieldType": "String"
     }
   ],
+  "jpaMetamodelFiltering": true,
   "name": "Country",
   "relationships": [
     {

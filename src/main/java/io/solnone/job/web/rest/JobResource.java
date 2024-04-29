@@ -1,8 +1,10 @@
 package io.solnone.job.web.rest;
 
+import io.solnone.job.domain.Job;
 import io.solnone.job.repository.JobRepository;
+import io.solnone.job.service.JobQueryService;
 import io.solnone.job.service.JobService;
-import io.solnone.job.service.dto.JobDTO;
+import io.solnone.job.service.criteria.JobCriteria;
 import io.solnone.job.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -41,48 +42,51 @@ public class JobResource {
 
     private final JobRepository jobRepository;
 
-    public JobResource(JobService jobService, JobRepository jobRepository) {
+    private final JobQueryService jobQueryService;
+
+    public JobResource(JobService jobService, JobRepository jobRepository, JobQueryService jobQueryService) {
         this.jobService = jobService;
         this.jobRepository = jobRepository;
+        this.jobQueryService = jobQueryService;
     }
 
     /**
      * {@code POST  /jobs} : Create a new job.
      *
-     * @param jobDTO the jobDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new jobDTO, or with status {@code 400 (Bad Request)} if the job has already an ID.
+     * @param job the job to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new job, or with status {@code 400 (Bad Request)} if the job has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    public ResponseEntity<JobDTO> createJob(@RequestBody JobDTO jobDTO) throws URISyntaxException {
-        log.debug("REST request to save Job : {}", jobDTO);
-        if (jobDTO.getId() != null) {
+    public ResponseEntity<Job> createJob(@RequestBody Job job) throws URISyntaxException {
+        log.debug("REST request to save Job : {}", job);
+        if (job.getId() != null) {
             throw new BadRequestAlertException("A new job cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        jobDTO = jobService.save(jobDTO);
-        return ResponseEntity.created(new URI("/api/jobs/" + jobDTO.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, jobDTO.getId().toString()))
-            .body(jobDTO);
+        job = jobService.save(job);
+        return ResponseEntity.created(new URI("/api/jobs/" + job.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, job.getId().toString()))
+            .body(job);
     }
 
     /**
      * {@code PUT  /jobs/:id} : Updates an existing job.
      *
-     * @param id the id of the jobDTO to save.
-     * @param jobDTO the jobDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated jobDTO,
-     * or with status {@code 400 (Bad Request)} if the jobDTO is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the jobDTO couldn't be updated.
+     * @param id the id of the job to save.
+     * @param job the job to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated job,
+     * or with status {@code 400 (Bad Request)} if the job is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the job couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<JobDTO> updateJob(@PathVariable(value = "id", required = false) final Long id, @RequestBody JobDTO jobDTO)
+    public ResponseEntity<Job> updateJob(@PathVariable(value = "id", required = false) final Long id, @RequestBody Job job)
         throws URISyntaxException {
-        log.debug("REST request to update Job : {}, {}", id, jobDTO);
-        if (jobDTO.getId() == null) {
+        log.debug("REST request to update Job : {}, {}", id, job);
+        if (job.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, jobDTO.getId())) {
+        if (!Objects.equals(id, job.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -90,31 +94,31 @@ public class JobResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        jobDTO = jobService.update(jobDTO);
+        job = jobService.update(job);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, jobDTO.getId().toString()))
-            .body(jobDTO);
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, job.getId().toString()))
+            .body(job);
     }
 
     /**
      * {@code PATCH  /jobs/:id} : Partial updates given fields of an existing job, field will ignore if it is null
      *
-     * @param id the id of the jobDTO to save.
-     * @param jobDTO the jobDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated jobDTO,
-     * or with status {@code 400 (Bad Request)} if the jobDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the jobDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the jobDTO couldn't be updated.
+     * @param id the id of the job to save.
+     * @param job the job to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated job,
+     * or with status {@code 400 (Bad Request)} if the job is not valid,
+     * or with status {@code 404 (Not Found)} if the job is not found,
+     * or with status {@code 500 (Internal Server Error)} if the job couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<JobDTO> partialUpdateJob(@PathVariable(value = "id", required = false) final Long id, @RequestBody JobDTO jobDTO)
+    public ResponseEntity<Job> partialUpdateJob(@PathVariable(value = "id", required = false) final Long id, @RequestBody Job job)
         throws URISyntaxException {
-        log.debug("REST request to partial update Job partially : {}, {}", id, jobDTO);
-        if (jobDTO.getId() == null) {
+        log.debug("REST request to partial update Job partially : {}, {}", id, job);
+        if (job.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, jobDTO.getId())) {
+        if (!Objects.equals(id, job.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -122,11 +126,11 @@ public class JobResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<JobDTO> result = jobService.partialUpdate(jobDTO);
+        Optional<Job> result = jobService.partialUpdate(job);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, jobDTO.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, job.getId().toString())
         );
     }
 
@@ -134,48 +138,47 @@ public class JobResource {
      * {@code GET  /jobs} : get all the jobs.
      *
      * @param pageable the pagination information.
-     * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
-     * @param filter the filter of the request.
+     * @param criteria the criteria which the requested entities should match.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of jobs in body.
      */
     @GetMapping("")
-    public ResponseEntity<List<JobDTO>> getAllJobs(
-        @org.springdoc.core.annotations.ParameterObject Pageable pageable,
-        @RequestParam(name = "filter", required = false) String filter,
-        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload
-    ) {
-        if ("jobhistory-is-null".equals(filter)) {
-            log.debug("REST request to get all Jobs where jobHistory is null");
-            return new ResponseEntity<>(jobService.findAllWhereJobHistoryIsNull(), HttpStatus.OK);
-        }
-        log.debug("REST request to get a page of Jobs");
-        Page<JobDTO> page;
-        if (eagerload) {
-            page = jobService.findAllWithEagerRelationships(pageable);
-        } else {
-            page = jobService.findAll(pageable);
-        }
+    public ResponseEntity<List<Job>> getAllJobs(JobCriteria criteria, @org.springdoc.core.annotations.ParameterObject Pageable pageable) {
+        log.debug("REST request to get Jobs by criteria: {}", criteria);
+
+        Page<Job> page = jobQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**
+     * {@code GET  /jobs/count} : count all the jobs.
+     *
+     * @param criteria the criteria which the requested entities should match.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
+     */
+    @GetMapping("/count")
+    public ResponseEntity<Long> countJobs(JobCriteria criteria) {
+        log.debug("REST request to count Jobs by criteria: {}", criteria);
+        return ResponseEntity.ok().body(jobQueryService.countByCriteria(criteria));
+    }
+
+    /**
      * {@code GET  /jobs/:id} : get the "id" job.
      *
-     * @param id the id of the jobDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the jobDTO, or with status {@code 404 (Not Found)}.
+     * @param id the id of the job to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the job, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<JobDTO> getJob(@PathVariable("id") Long id) {
+    public ResponseEntity<Job> getJob(@PathVariable("id") Long id) {
         log.debug("REST request to get Job : {}", id);
-        Optional<JobDTO> jobDTO = jobService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(jobDTO);
+        Optional<Job> job = jobService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(job);
     }
 
     /**
      * {@code DELETE  /jobs/:id} : delete the "id" job.
      *
-     * @param id the id of the jobDTO to delete.
+     * @param id the id of the job to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")

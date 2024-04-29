@@ -1,6 +1,6 @@
 package io.solnone.job.service;
 
-import io.solnone.job.service.dto.CountryDTO;
+import io.solnone.job.domain.Country;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,40 +11,33 @@ public interface CountryService {
     /**
      * Save a country.
      *
-     * @param countryDTO the entity to save.
+     * @param country the entity to save.
      * @return the persisted entity.
      */
-    CountryDTO save(CountryDTO countryDTO);
+    Country save(Country country);
 
     /**
      * Updates a country.
      *
-     * @param countryDTO the entity to update.
+     * @param country the entity to update.
      * @return the persisted entity.
      */
-    CountryDTO update(CountryDTO countryDTO);
+    Country update(Country country);
 
     /**
      * Partially updates a country.
      *
-     * @param countryDTO the entity to update partially.
+     * @param country the entity to update partially.
      * @return the persisted entity.
      */
-    Optional<CountryDTO> partialUpdate(CountryDTO countryDTO);
+    Optional<Country> partialUpdate(Country country);
 
     /**
-     * Get all the countries.
-     *
-     * @return the list of entities.
-     */
-    List<CountryDTO> findAll();
-
-    /**
-     * Get all the CountryDTO where Location is {@code null}.
+     * Get all the Country where Location is {@code null}.
      *
      * @return the {@link List} of entities.
      */
-    List<CountryDTO> findAllWhereLocationIsNull();
+    List<Country> findAllWhereLocationIsNull();
 
     /**
      * Get the "id" country.
@@ -52,7 +45,7 @@ public interface CountryService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<CountryDTO> findOne(Long id);
+    Optional<Country> findOne(Long id);
 
     /**
      * Delete the "id" country.

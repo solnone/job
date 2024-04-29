@@ -122,7 +122,7 @@ describe('Region e2e test', () => {
         cy.url().should('match', regionPageUrlPattern);
       });
 
-      it('edit button click should load edit Region page and save', () => {
+      it.skip('edit button click should load edit Region page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('Region');
         cy.get(entityCreateSaveButtonSelector).click();

@@ -11,8 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.solnone.job.IntegrationTest;
 import io.solnone.job.domain.Region;
 import io.solnone.job.repository.RegionRepository;
-import io.solnone.job.service.dto.RegionDTO;
-import io.solnone.job.service.mapper.RegionMapper;
 import jakarta.persistence.EntityManager;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -47,9 +45,6 @@ class RegionResourceIT {
 
     @Autowired
     private RegionRepository regionRepository;
-
-    @Autowired
-    private RegionMapper regionMapper;
 
     @Autowired
     private EntityManager em;
@@ -91,20 +86,18 @@ class RegionResourceIT {
     void createRegion() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
         // Create the Region
-        RegionDTO regionDTO = regionMapper.toDto(region);
-        var returnedRegionDTO = om.readValue(
+        var returnedRegion = om.readValue(
             restRegionMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(regionDTO)))
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(region)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
-            RegionDTO.class
+            Region.class
         );
 
         // Validate the Region in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
-        var returnedRegion = regionMapper.toEntity(returnedRegionDTO);
         assertRegionUpdatableFieldsEquals(returnedRegion, getPersistedRegion(returnedRegion));
     }
 
@@ -113,13 +106,12 @@ class RegionResourceIT {
     void createRegionWithExistingId() throws Exception {
         // Create the Region with an existing ID
         region.setId(1L);
-        RegionDTO regionDTO = regionMapper.toDto(region);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restRegionMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(regionDTO)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(region)))
             .andExpect(status().isBadRequest());
 
         // Validate the Region in the database
@@ -158,6 +150,114 @@ class RegionResourceIT {
 
     @Test
     @Transactional
+    void getRegionsByIdFiltering() throws Exception {
+        // Initialize the database
+        regionRepository.saveAndFlush(region);
+
+        Long id = region.getId();
+
+        defaultRegionFiltering("id.equals=" + id, "id.notEquals=" + id);
+
+        defaultRegionFiltering("id.greaterThanOrEqual=" + id, "id.greaterThan=" + id);
+
+        defaultRegionFiltering("id.lessThanOrEqual=" + id, "id.lessThan=" + id);
+    }
+
+    @Test
+    @Transactional
+    void getAllRegionsByRegionNameIsEqualToSomething() throws Exception {
+        // Initialize the database
+        regionRepository.saveAndFlush(region);
+
+        // Get all the regionList where regionName equals to
+        defaultRegionFiltering("regionName.equals=" + DEFAULT_REGION_NAME, "regionName.equals=" + UPDATED_REGION_NAME);
+    }
+
+    @Test
+    @Transactional
+    void getAllRegionsByRegionNameIsInShouldWork() throws Exception {
+        // Initialize the database
+        regionRepository.saveAndFlush(region);
+
+        // Get all the regionList where regionName in
+        defaultRegionFiltering("regionName.in=" + DEFAULT_REGION_NAME + "," + UPDATED_REGION_NAME, "regionName.in=" + UPDATED_REGION_NAME);
+    }
+
+    @Test
+    @Transactional
+    void getAllRegionsByRegionNameIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        regionRepository.saveAndFlush(region);
+
+        // Get all the regionList where regionName is not null
+        defaultRegionFiltering("regionName.specified=true", "regionName.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllRegionsByRegionNameContainsSomething() throws Exception {
+        // Initialize the database
+        regionRepository.saveAndFlush(region);
+
+        // Get all the regionList where regionName contains
+        defaultRegionFiltering("regionName.contains=" + DEFAULT_REGION_NAME, "regionName.contains=" + UPDATED_REGION_NAME);
+    }
+
+    @Test
+    @Transactional
+    void getAllRegionsByRegionNameNotContainsSomething() throws Exception {
+        // Initialize the database
+        regionRepository.saveAndFlush(region);
+
+        // Get all the regionList where regionName does not contain
+        defaultRegionFiltering("regionName.doesNotContain=" + UPDATED_REGION_NAME, "regionName.doesNotContain=" + DEFAULT_REGION_NAME);
+    }
+
+    private void defaultRegionFiltering(String shouldBeFound, String shouldNotBeFound) throws Exception {
+        defaultRegionShouldBeFound(shouldBeFound);
+        defaultRegionShouldNotBeFound(shouldNotBeFound);
+    }
+
+    /**
+     * Executes the search, and checks that the default entity is returned.
+     */
+    private void defaultRegionShouldBeFound(String filter) throws Exception {
+        restRegionMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(region.getId().intValue())))
+            .andExpect(jsonPath("$.[*].regionName").value(hasItem(DEFAULT_REGION_NAME)));
+
+        // Check, that the count call also returns 1
+        restRegionMockMvc
+            .perform(get(ENTITY_API_URL + "/count?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().string("1"));
+    }
+
+    /**
+     * Executes the search, and checks that the default entity is not returned.
+     */
+    private void defaultRegionShouldNotBeFound(String filter) throws Exception {
+        restRegionMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
+
+        // Check, that the count call also returns 0
+        restRegionMockMvc
+            .perform(get(ENTITY_API_URL + "/count?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().string("0"));
+    }
+
+    @Test
+    @Transactional
     void getNonExistingRegion() throws Exception {
         // Get the region
         restRegionMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
@@ -176,11 +276,12 @@ class RegionResourceIT {
         // Disconnect from session so that the updates on updatedRegion are not directly saved in db
         em.detach(updatedRegion);
         updatedRegion.regionName(UPDATED_REGION_NAME);
-        RegionDTO regionDTO = regionMapper.toDto(updatedRegion);
 
         restRegionMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, regionDTO.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(regionDTO))
+                put(ENTITY_API_URL_ID, updatedRegion.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(updatedRegion))
             )
             .andExpect(status().isOk());
 
@@ -195,14 +296,9 @@ class RegionResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         region.setId(longCount.incrementAndGet());
 
-        // Create the Region
-        RegionDTO regionDTO = regionMapper.toDto(region);
-
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restRegionMockMvc
-            .perform(
-                put(ENTITY_API_URL_ID, regionDTO.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(regionDTO))
-            )
+            .perform(put(ENTITY_API_URL_ID, region.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(region)))
             .andExpect(status().isBadRequest());
 
         // Validate the Region in the database
@@ -215,15 +311,12 @@ class RegionResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         region.setId(longCount.incrementAndGet());
 
-        // Create the Region
-        RegionDTO regionDTO = regionMapper.toDto(region);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restRegionMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, longCount.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(regionDTO))
+                    .content(om.writeValueAsBytes(region))
             )
             .andExpect(status().isBadRequest());
 
@@ -237,12 +330,9 @@ class RegionResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         region.setId(longCount.incrementAndGet());
 
-        // Create the Region
-        RegionDTO regionDTO = regionMapper.toDto(region);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restRegionMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(regionDTO)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(region)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Region in the database
@@ -309,15 +399,10 @@ class RegionResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         region.setId(longCount.incrementAndGet());
 
-        // Create the Region
-        RegionDTO regionDTO = regionMapper.toDto(region);
-
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restRegionMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, regionDTO.getId())
-                    .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(regionDTO))
+                patch(ENTITY_API_URL_ID, region.getId()).contentType("application/merge-patch+json").content(om.writeValueAsBytes(region))
             )
             .andExpect(status().isBadRequest());
 
@@ -331,15 +416,12 @@ class RegionResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         region.setId(longCount.incrementAndGet());
 
-        // Create the Region
-        RegionDTO regionDTO = regionMapper.toDto(region);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restRegionMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, longCount.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(regionDTO))
+                    .content(om.writeValueAsBytes(region))
             )
             .andExpect(status().isBadRequest());
 
@@ -353,12 +435,9 @@ class RegionResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         region.setId(longCount.incrementAndGet());
 
-        // Create the Region
-        RegionDTO regionDTO = regionMapper.toDto(region);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restRegionMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(regionDTO)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(region)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Region in the database

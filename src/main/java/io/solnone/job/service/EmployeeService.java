@@ -2,17 +2,11 @@ package io.solnone.job.service;
 
 import io.solnone.job.domain.Employee;
 import io.solnone.job.repository.EmployeeRepository;
-import io.solnone.job.service.dto.EmployeeDTO;
-import io.solnone.job.service.mapper.EmployeeMapper;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,69 +21,69 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
 
-    private final EmployeeMapper employeeMapper;
-
-    public EmployeeService(EmployeeRepository employeeRepository, EmployeeMapper employeeMapper) {
+    public EmployeeService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
-        this.employeeMapper = employeeMapper;
     }
 
     /**
      * Save a employee.
      *
-     * @param employeeDTO the entity to save.
+     * @param employee the entity to save.
      * @return the persisted entity.
      */
-    public EmployeeDTO save(EmployeeDTO employeeDTO) {
-        log.debug("Request to save Employee : {}", employeeDTO);
-        Employee employee = employeeMapper.toEntity(employeeDTO);
-        employee = employeeRepository.save(employee);
-        return employeeMapper.toDto(employee);
+    public Employee save(Employee employee) {
+        log.debug("Request to save Employee : {}", employee);
+        return employeeRepository.save(employee);
     }
 
     /**
      * Update a employee.
      *
-     * @param employeeDTO the entity to save.
+     * @param employee the entity to save.
      * @return the persisted entity.
      */
-    public EmployeeDTO update(EmployeeDTO employeeDTO) {
-        log.debug("Request to update Employee : {}", employeeDTO);
-        Employee employee = employeeMapper.toEntity(employeeDTO);
-        employee = employeeRepository.save(employee);
-        return employeeMapper.toDto(employee);
+    public Employee update(Employee employee) {
+        log.debug("Request to update Employee : {}", employee);
+        return employeeRepository.save(employee);
     }
 
     /**
      * Partially update a employee.
      *
-     * @param employeeDTO the entity to update partially.
+     * @param employee the entity to update partially.
      * @return the persisted entity.
      */
-    public Optional<EmployeeDTO> partialUpdate(EmployeeDTO employeeDTO) {
-        log.debug("Request to partially update Employee : {}", employeeDTO);
+    public Optional<Employee> partialUpdate(Employee employee) {
+        log.debug("Request to partially update Employee : {}", employee);
 
         return employeeRepository
-            .findById(employeeDTO.getId())
+            .findById(employee.getId())
             .map(existingEmployee -> {
-                employeeMapper.partialUpdate(existingEmployee, employeeDTO);
+                if (employee.getFirstName() != null) {
+                    existingEmployee.setFirstName(employee.getFirstName());
+                }
+                if (employee.getLastName() != null) {
+                    existingEmployee.setLastName(employee.getLastName());
+                }
+                if (employee.getEmail() != null) {
+                    existingEmployee.setEmail(employee.getEmail());
+                }
+                if (employee.getPhoneNumber() != null) {
+                    existingEmployee.setPhoneNumber(employee.getPhoneNumber());
+                }
+                if (employee.getHireDate() != null) {
+                    existingEmployee.setHireDate(employee.getHireDate());
+                }
+                if (employee.getSalary() != null) {
+                    existingEmployee.setSalary(employee.getSalary());
+                }
+                if (employee.getCommissionPct() != null) {
+                    existingEmployee.setCommissionPct(employee.getCommissionPct());
+                }
 
                 return existingEmployee;
             })
-            .map(employeeRepository::save)
-            .map(employeeMapper::toDto);
-    }
-
-    /**
-     * Get all the employees.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
-     */
-    @Transactional(readOnly = true)
-    public Page<EmployeeDTO> findAll(Pageable pageable) {
-        log.debug("Request to get all Employees");
-        return employeeRepository.findAll(pageable).map(employeeMapper::toDto);
+            .map(employeeRepository::save);
     }
 
     /**
@@ -97,12 +91,11 @@ public class EmployeeService {
      *  @return the list of entities.
      */
     @Transactional(readOnly = true)
-    public List<EmployeeDTO> findAllWhereJobHistoryIsNull() {
+    public List<Employee> findAllWhereJobHistoryIsNull() {
         log.debug("Request to get all employees where JobHistory is null");
         return StreamSupport.stream(employeeRepository.findAll().spliterator(), false)
             .filter(employee -> employee.getJobHistory() == null)
-            .map(employeeMapper::toDto)
-            .collect(Collectors.toCollection(LinkedList::new));
+            .toList();
     }
 
     /**
@@ -112,9 +105,9 @@ public class EmployeeService {
      * @return the entity.
      */
     @Transactional(readOnly = true)
-    public Optional<EmployeeDTO> findOne(Long id) {
+    public Optional<Employee> findOne(Long id) {
         log.debug("Request to get Employee : {}", id);
-        return employeeRepository.findById(id).map(employeeMapper::toDto);
+        return employeeRepository.findById(id);
     }
 
     /**

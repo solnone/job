@@ -110,13 +110,13 @@ export class JobHistoryUpdateComponent implements OnInit {
 
   protected loadRelationshipsOptions(): void {
     this.jobService
-      .query({ filter: 'jobhistory-is-null' })
+      .query({ 'jobHistoryId.specified': 'false' })
       .pipe(map((res: HttpResponse<IJob[]>) => res.body ?? []))
       .pipe(map((jobs: IJob[]) => this.jobService.addJobToCollectionIfMissing<IJob>(jobs, this.jobHistory?.job)))
       .subscribe((jobs: IJob[]) => (this.jobsCollection = jobs));
 
     this.departmentService
-      .query({ filter: 'jobhistory-is-null' })
+      .query({ 'jobHistoryId.specified': 'false' })
       .pipe(map((res: HttpResponse<IDepartment[]>) => res.body ?? []))
       .pipe(
         map((departments: IDepartment[]) =>
@@ -126,7 +126,7 @@ export class JobHistoryUpdateComponent implements OnInit {
       .subscribe((departments: IDepartment[]) => (this.departmentsCollection = departments));
 
     this.employeeService
-      .query({ filter: 'jobhistory-is-null' })
+      .query({ 'jobHistoryId.specified': 'false' })
       .pipe(map((res: HttpResponse<IEmployee[]>) => res.body ?? []))
       .pipe(
         map((employees: IEmployee[]) =>

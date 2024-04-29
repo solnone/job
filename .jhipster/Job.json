@@ -4,7 +4,6 @@
   },
   "applications": "*",
   "documentation": "職位",
-  "dto": "mapstruct",
   "fields": [
     {
       "documentation": "職稱",
@@ -22,6 +21,7 @@
       "fieldType": "Long"
     }
   ],
+  "jpaMetamodelFiltering": true,
   "name": "Job",
   "pagination": "pagination",
   "relationships": [

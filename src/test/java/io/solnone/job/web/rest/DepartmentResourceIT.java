@@ -10,9 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.solnone.job.IntegrationTest;
 import io.solnone.job.domain.Department;
+import io.solnone.job.domain.Location;
 import io.solnone.job.repository.DepartmentRepository;
-import io.solnone.job.service.dto.DepartmentDTO;
-import io.solnone.job.service.mapper.DepartmentMapper;
 import jakarta.persistence.EntityManager;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -47,9 +46,6 @@ class DepartmentResourceIT {
 
     @Autowired
     private DepartmentRepository departmentRepository;
-
-    @Autowired
-    private DepartmentMapper departmentMapper;
 
     @Autowired
     private EntityManager em;
@@ -91,20 +87,18 @@ class DepartmentResourceIT {
     void createDepartment() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
         // Create the Department
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
-        var returnedDepartmentDTO = om.readValue(
+        var returnedDepartment = om.readValue(
             restDepartmentMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(departmentDTO)))
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(department)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
-            DepartmentDTO.class
+            Department.class
         );
 
         // Validate the Department in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
-        var returnedDepartment = departmentMapper.toEntity(returnedDepartmentDTO);
         assertDepartmentUpdatableFieldsEquals(returnedDepartment, getPersistedDepartment(returnedDepartment));
     }
 
@@ -113,13 +107,12 @@ class DepartmentResourceIT {
     void createDepartmentWithExistingId() throws Exception {
         // Create the Department with an existing ID
         department.setId(1L);
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restDepartmentMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(departmentDTO)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(department)))
             .andExpect(status().isBadRequest());
 
         // Validate the Department in the database
@@ -134,10 +127,9 @@ class DepartmentResourceIT {
         department.setDepartmentName(null);
 
         // Create the Department, which fails.
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
 
         restDepartmentMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(departmentDTO)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(department)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -175,6 +167,145 @@ class DepartmentResourceIT {
 
     @Test
     @Transactional
+    void getDepartmentsByIdFiltering() throws Exception {
+        // Initialize the database
+        departmentRepository.saveAndFlush(department);
+
+        Long id = department.getId();
+
+        defaultDepartmentFiltering("id.equals=" + id, "id.notEquals=" + id);
+
+        defaultDepartmentFiltering("id.greaterThanOrEqual=" + id, "id.greaterThan=" + id);
+
+        defaultDepartmentFiltering("id.lessThanOrEqual=" + id, "id.lessThan=" + id);
+    }
+
+    @Test
+    @Transactional
+    void getAllDepartmentsByDepartmentNameIsEqualToSomething() throws Exception {
+        // Initialize the database
+        departmentRepository.saveAndFlush(department);
+
+        // Get all the departmentList where departmentName equals to
+        defaultDepartmentFiltering("departmentName.equals=" + DEFAULT_DEPARTMENT_NAME, "departmentName.equals=" + UPDATED_DEPARTMENT_NAME);
+    }
+
+    @Test
+    @Transactional
+    void getAllDepartmentsByDepartmentNameIsInShouldWork() throws Exception {
+        // Initialize the database
+        departmentRepository.saveAndFlush(department);
+
+        // Get all the departmentList where departmentName in
+        defaultDepartmentFiltering(
+            "departmentName.in=" + DEFAULT_DEPARTMENT_NAME + "," + UPDATED_DEPARTMENT_NAME,
+            "departmentName.in=" + UPDATED_DEPARTMENT_NAME
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllDepartmentsByDepartmentNameIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        departmentRepository.saveAndFlush(department);
+
+        // Get all the departmentList where departmentName is not null
+        defaultDepartmentFiltering("departmentName.specified=true", "departmentName.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllDepartmentsByDepartmentNameContainsSomething() throws Exception {
+        // Initialize the database
+        departmentRepository.saveAndFlush(department);
+
+        // Get all the departmentList where departmentName contains
+        defaultDepartmentFiltering(
+            "departmentName.contains=" + DEFAULT_DEPARTMENT_NAME,
+            "departmentName.contains=" + UPDATED_DEPARTMENT_NAME
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllDepartmentsByDepartmentNameNotContainsSomething() throws Exception {
+        // Initialize the database
+        departmentRepository.saveAndFlush(department);
+
+        // Get all the departmentList where departmentName does not contain
+        defaultDepartmentFiltering(
+            "departmentName.doesNotContain=" + UPDATED_DEPARTMENT_NAME,
+            "departmentName.doesNotContain=" + DEFAULT_DEPARTMENT_NAME
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllDepartmentsByLocationIsEqualToSomething() throws Exception {
+        Location location;
+        if (TestUtil.findAll(em, Location.class).isEmpty()) {
+            departmentRepository.saveAndFlush(department);
+            location = LocationResourceIT.createEntity(em);
+        } else {
+            location = TestUtil.findAll(em, Location.class).get(0);
+        }
+        em.persist(location);
+        em.flush();
+        department.setLocation(location);
+        departmentRepository.saveAndFlush(department);
+        Long locationId = location.getId();
+        // Get all the departmentList where location equals to locationId
+        defaultDepartmentShouldBeFound("locationId.equals=" + locationId);
+
+        // Get all the departmentList where location equals to (locationId + 1)
+        defaultDepartmentShouldNotBeFound("locationId.equals=" + (locationId + 1));
+    }
+
+    private void defaultDepartmentFiltering(String shouldBeFound, String shouldNotBeFound) throws Exception {
+        defaultDepartmentShouldBeFound(shouldBeFound);
+        defaultDepartmentShouldNotBeFound(shouldNotBeFound);
+    }
+
+    /**
+     * Executes the search, and checks that the default entity is returned.
+     */
+    private void defaultDepartmentShouldBeFound(String filter) throws Exception {
+        restDepartmentMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(department.getId().intValue())))
+            .andExpect(jsonPath("$.[*].departmentName").value(hasItem(DEFAULT_DEPARTMENT_NAME)));
+
+        // Check, that the count call also returns 1
+        restDepartmentMockMvc
+            .perform(get(ENTITY_API_URL + "/count?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().string("1"));
+    }
+
+    /**
+     * Executes the search, and checks that the default entity is not returned.
+     */
+    private void defaultDepartmentShouldNotBeFound(String filter) throws Exception {
+        restDepartmentMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
+
+        // Check, that the count call also returns 0
+        restDepartmentMockMvc
+            .perform(get(ENTITY_API_URL + "/count?sort=id,desc&" + filter))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().string("0"));
+    }
+
+    @Test
+    @Transactional
     void getNonExistingDepartment() throws Exception {
         // Get the department
         restDepartmentMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
@@ -193,13 +324,12 @@ class DepartmentResourceIT {
         // Disconnect from session so that the updates on updatedDepartment are not directly saved in db
         em.detach(updatedDepartment);
         updatedDepartment.departmentName(UPDATED_DEPARTMENT_NAME);
-        DepartmentDTO departmentDTO = departmentMapper.toDto(updatedDepartment);
 
         restDepartmentMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, departmentDTO.getId())
+                put(ENTITY_API_URL_ID, updatedDepartment.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(departmentDTO))
+                    .content(om.writeValueAsBytes(updatedDepartment))
             )
             .andExpect(status().isOk());
 
@@ -214,15 +344,10 @@ class DepartmentResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         department.setId(longCount.incrementAndGet());
 
-        // Create the Department
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
-
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restDepartmentMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, departmentDTO.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(departmentDTO))
+                put(ENTITY_API_URL_ID, department.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(department))
             )
             .andExpect(status().isBadRequest());
 
@@ -236,15 +361,12 @@ class DepartmentResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         department.setId(longCount.incrementAndGet());
 
-        // Create the Department
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restDepartmentMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, longCount.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(departmentDTO))
+                    .content(om.writeValueAsBytes(department))
             )
             .andExpect(status().isBadRequest());
 
@@ -258,12 +380,9 @@ class DepartmentResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         department.setId(longCount.incrementAndGet());
 
-        // Create the Department
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restDepartmentMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(departmentDTO)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(department)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Department in the database
@@ -333,15 +452,12 @@ class DepartmentResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         department.setId(longCount.incrementAndGet());
 
-        // Create the Department
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
-
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restDepartmentMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, departmentDTO.getId())
+                patch(ENTITY_API_URL_ID, department.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(departmentDTO))
+                    .content(om.writeValueAsBytes(department))
             )
             .andExpect(status().isBadRequest());
 
@@ -355,15 +471,12 @@ class DepartmentResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         department.setId(longCount.incrementAndGet());
 
-        // Create the Department
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restDepartmentMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, longCount.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(departmentDTO))
+                    .content(om.writeValueAsBytes(department))
             )
             .andExpect(status().isBadRequest());
 
@@ -377,12 +490,9 @@ class DepartmentResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         department.setId(longCount.incrementAndGet());
 
-        // Create the Department
-        DepartmentDTO departmentDTO = departmentMapper.toDto(department);
-
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restDepartmentMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(departmentDTO)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(department)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Department in the database

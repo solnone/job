@@ -1,6 +1,7 @@
 package io.solnone.job.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import org.hibernate.annotations.Cache;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * 國家
  */
+@Schema(description = "國家")
 @Entity
 @Table(name = "country")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -26,6 +28,7 @@ public class Country implements Serializable {
     /**
      * 國家名稱
      */
+    @Schema(description = "國家名稱")
     @Column(name = "country_name")
     private String countryName;
 
