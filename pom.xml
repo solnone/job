@@ -853,6 +853,9 @@
                                     <title>job</title>
                                     <useSpringBoot3>true</useSpringBoot3>
                                 </configOptions>
+                                <importMappings>
+                                    <importMapping>Pageable=org.springframework.data.domain.Pageable</importMapping>
+                                </importMappings>
                             </configuration>
                         </execution>
                     </executions>

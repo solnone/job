@@ -58,9 +58,60 @@ paths:
         - jwt:
             - write:pets
             - read:pets
+  /pet/find:
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by page
+      description: Finds Pets by page
+      operationId: find
+      parameters:
+        - name: pageable
+          in: query
+          description: pageable
+          required: false
+          explode: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+        '400':
+          description: Invalid status value
+      security:
+        - jwt:
+            - write:pets
+            - read:pets
 
 components:
   schemas:
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          default: 0
+        size:
+          type: integer
+          format: int32
+          default: 10
+        sort:
+          type: array
+          items:
+            type: string
+          default: ['id']
     Pet:
       required:
         - name
