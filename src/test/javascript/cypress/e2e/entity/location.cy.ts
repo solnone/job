@@ -122,7 +122,7 @@ describe('Location e2e test', () => {
         cy.url().should('match', locationPageUrlPattern);
       });
 
-      it.skip('edit button click should load edit Location page and save', () => {
+      it('edit button click should load edit Location page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('Location');
         cy.get(entityCreateSaveButtonSelector).click();
@@ -133,7 +133,9 @@ describe('Location e2e test', () => {
       });
 
       it('last delete button click should delete instance of Location', () => {
+        cy.intercept('GET', '/api/locations/*').as('dialogDeleteRequest');
         cy.get(entityDeleteButtonSelector).last().click();
+        cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('location').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
@@ -157,17 +159,17 @@ describe('Location e2e test', () => {
     });
 
     it('should create an instance of Location', () => {
-      cy.get(`[data-cy="streetAddress"]`).type('upon dialogue bedevil');
-      cy.get(`[data-cy="streetAddress"]`).should('have.value', 'upon dialogue bedevil');
+      cy.get(`[data-cy="streetAddress"]`).type('sum');
+      cy.get(`[data-cy="streetAddress"]`).should('have.value', 'sum');
 
-      cy.get(`[data-cy="postalCode"]`).type('humidity awkwardly ugh');
-      cy.get(`[data-cy="postalCode"]`).should('have.value', 'humidity awkwardly ugh');
+      cy.get(`[data-cy="postalCode"]`).type('deceivingly');
+      cy.get(`[data-cy="postalCode"]`).should('have.value', 'deceivingly');
 
-      cy.get(`[data-cy="city"]`).type('Miguelcester');
-      cy.get(`[data-cy="city"]`).should('have.value', 'Miguelcester');
+      cy.get(`[data-cy="city"]`).type('Port Estrella');
+      cy.get(`[data-cy="city"]`).should('have.value', 'Port Estrella');
 
-      cy.get(`[data-cy="stateProvince"]`).type('zany given straight');
-      cy.get(`[data-cy="stateProvince"]`).should('have.value', 'zany given straight');
+      cy.get(`[data-cy="stateProvince"]`).type('ew mockingly colonize');
+      cy.get(`[data-cy="stateProvince"]`).should('have.value', 'ew mockingly colonize');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

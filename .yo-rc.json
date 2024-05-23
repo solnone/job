@@ -6,7 +6,7 @@
     "blueprints": [],
     "buildTool": "maven",
     "cacheProvider": "ehcache",
-    "clientFramework": "angular",
+    "clientFramework": "react",
     "clientPackageManager": "npm",
     "creationTimestamp": 1713422345911,
     "databaseType": "sql",

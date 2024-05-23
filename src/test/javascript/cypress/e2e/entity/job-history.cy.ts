@@ -125,7 +125,7 @@ describe('JobHistory e2e test', () => {
         cy.url().should('match', jobHistoryPageUrlPattern);
       });
 
-      it.skip('edit button click should load edit JobHistory page and save', () => {
+      it('edit button click should load edit JobHistory page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('JobHistory');
         cy.get(entityCreateSaveButtonSelector).click();
@@ -136,7 +136,9 @@ describe('JobHistory e2e test', () => {
       });
 
       it('last delete button click should delete instance of JobHistory', () => {
+        cy.intercept('GET', '/api/job-histories/*').as('dialogDeleteRequest');
         cy.get(entityDeleteButtonSelector).last().click();
+        cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('jobHistory').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
@@ -160,15 +162,15 @@ describe('JobHistory e2e test', () => {
     });
 
     it('should create an instance of JobHistory', () => {
-      cy.get(`[data-cy="startDate"]`).type('2024-04-17T14:38');
+      cy.get(`[data-cy="startDate"]`).type('2024-04-18T03:48');
       cy.get(`[data-cy="startDate"]`).blur();
-      cy.get(`[data-cy="startDate"]`).should('have.value', '2024-04-17T14:38');
+      cy.get(`[data-cy="startDate"]`).should('have.value', '2024-04-18T03:48');
 
-      cy.get(`[data-cy="endDate"]`).type('2024-04-17T21:00');
+      cy.get(`[data-cy="endDate"]`).type('2024-04-17T17:08');
       cy.get(`[data-cy="endDate"]`).blur();
-      cy.get(`[data-cy="endDate"]`).should('have.value', '2024-04-17T21:00');
+      cy.get(`[data-cy="endDate"]`).should('have.value', '2024-04-17T17:08');
 
-      cy.get(`[data-cy="language"]`).select('SPANISH');
+      cy.get(`[data-cy="language"]`).select('ENGLISH');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

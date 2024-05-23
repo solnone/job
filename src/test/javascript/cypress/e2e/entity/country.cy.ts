@@ -122,7 +122,7 @@ describe('Country e2e test', () => {
         cy.url().should('match', countryPageUrlPattern);
       });
 
-      it.skip('edit button click should load edit Country page and save', () => {
+      it('edit button click should load edit Country page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('Country');
         cy.get(entityCreateSaveButtonSelector).click();
@@ -133,7 +133,9 @@ describe('Country e2e test', () => {
       });
 
       it('last delete button click should delete instance of Country', () => {
+        cy.intercept('GET', '/api/countries/*').as('dialogDeleteRequest');
         cy.get(entityDeleteButtonSelector).last().click();
+        cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('country').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
@@ -157,8 +159,8 @@ describe('Country e2e test', () => {
     });
 
     it('should create an instance of Country', () => {
-      cy.get(`[data-cy="countryName"]`).type('sans boastfully');
-      cy.get(`[data-cy="countryName"]`).should('have.value', 'sans boastfully');
+      cy.get(`[data-cy="countryName"]`).type('shoestring');
+      cy.get(`[data-cy="countryName"]`).should('have.value', 'shoestring');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

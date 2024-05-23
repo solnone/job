@@ -125,7 +125,7 @@ describe('Employee e2e test', () => {
         cy.url().should('match', employeePageUrlPattern);
       });
 
-      it.skip('edit button click should load edit Employee page and save', () => {
+      it('edit button click should load edit Employee page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('Employee');
         cy.get(entityCreateSaveButtonSelector).click();
@@ -136,7 +136,9 @@ describe('Employee e2e test', () => {
       });
 
       it('last delete button click should delete instance of Employee', () => {
+        cy.intercept('GET', '/api/employees/*').as('dialogDeleteRequest');
         cy.get(entityDeleteButtonSelector).last().click();
+        cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('employee').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
@@ -160,27 +162,27 @@ describe('Employee e2e test', () => {
     });
 
     it('should create an instance of Employee', () => {
-      cy.get(`[data-cy="firstName"]`).type('Noelia');
-      cy.get(`[data-cy="firstName"]`).should('have.value', 'Noelia');
+      cy.get(`[data-cy="firstName"]`).type('Ross');
+      cy.get(`[data-cy="firstName"]`).should('have.value', 'Ross');
 
-      cy.get(`[data-cy="lastName"]`).type('Armstrong');
-      cy.get(`[data-cy="lastName"]`).should('have.value', 'Armstrong');
+      cy.get(`[data-cy="lastName"]`).type('Pollich');
+      cy.get(`[data-cy="lastName"]`).should('have.value', 'Pollich');
 
-      cy.get(`[data-cy="email"]`).type('Hal.Sauer49@gmail.com');
-      cy.get(`[data-cy="email"]`).should('have.value', 'Hal.Sauer49@gmail.com');
+      cy.get(`[data-cy="email"]`).type('Bradly_Willms@hotmail.com');
+      cy.get(`[data-cy="email"]`).should('have.value', 'Bradly_Willms@hotmail.com');
 
-      cy.get(`[data-cy="phoneNumber"]`).type('huzzah loyal');
-      cy.get(`[data-cy="phoneNumber"]`).should('have.value', 'huzzah loyal');
+      cy.get(`[data-cy="phoneNumber"]`).type('ouch times kosher');
+      cy.get(`[data-cy="phoneNumber"]`).should('have.value', 'ouch times kosher');
 
-      cy.get(`[data-cy="hireDate"]`).type('2024-04-18T05:22');
+      cy.get(`[data-cy="hireDate"]`).type('2024-04-17T09:58');
       cy.get(`[data-cy="hireDate"]`).blur();
-      cy.get(`[data-cy="hireDate"]`).should('have.value', '2024-04-18T05:22');
+      cy.get(`[data-cy="hireDate"]`).should('have.value', '2024-04-17T09:58');
 
-      cy.get(`[data-cy="salary"]`).type('4190');
-      cy.get(`[data-cy="salary"]`).should('have.value', '4190');
+      cy.get(`[data-cy="salary"]`).type('30141');
+      cy.get(`[data-cy="salary"]`).should('have.value', '30141');
 
-      cy.get(`[data-cy="commissionPct"]`).type('29222');
-      cy.get(`[data-cy="commissionPct"]`).should('have.value', '29222');
+      cy.get(`[data-cy="commissionPct"]`).type('16995');
+      cy.get(`[data-cy="commissionPct"]`).should('have.value', '16995');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

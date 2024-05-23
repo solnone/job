@@ -15,7 +15,7 @@ describe('Department e2e test', () => {
   const departmentPageUrlPattern = new RegExp('/department(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'user';
   const password = Cypress.env('E2E_PASSWORD') ?? 'user';
-  const departmentSample = { departmentName: 'deep supposing' };
+  const departmentSample = { departmentName: 'psst magnificent encyclopedia' };
 
   let department;
 
@@ -122,7 +122,7 @@ describe('Department e2e test', () => {
         cy.url().should('match', departmentPageUrlPattern);
       });
 
-      it.skip('edit button click should load edit Department page and save', () => {
+      it('edit button click should load edit Department page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('Department');
         cy.get(entityCreateSaveButtonSelector).click();
@@ -133,7 +133,9 @@ describe('Department e2e test', () => {
       });
 
       it('last delete button click should delete instance of Department', () => {
+        cy.intercept('GET', '/api/departments/*').as('dialogDeleteRequest');
         cy.get(entityDeleteButtonSelector).last().click();
+        cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('department').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
@@ -157,8 +159,8 @@ describe('Department e2e test', () => {
     });
 
     it('should create an instance of Department', () => {
-      cy.get(`[data-cy="departmentName"]`).type('locket bay');
-      cy.get(`[data-cy="departmentName"]`).should('have.value', 'locket bay');
+      cy.get(`[data-cy="departmentName"]`).type('spectate at');
+      cy.get(`[data-cy="departmentName"]`).should('have.value', 'spectate at');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

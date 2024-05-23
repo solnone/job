@@ -1192,7 +1192,7 @@
                                         <include>package-lock.json</include>
                                         <include>package.json</include>
                                         <include>tsconfig.json</include>
-                                        <include>tsconfig.app.json</include>
+                                        <include>.postcss.config.js</include>
                                         <include>webpack/*.*</include>
                                     </includes>
                                     <excludes>

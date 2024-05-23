@@ -125,7 +125,7 @@ describe('Job e2e test', () => {
         cy.url().should('match', jobPageUrlPattern);
       });
 
-      it.skip('edit button click should load edit Job page and save', () => {
+      it('edit button click should load edit Job page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('Job');
         cy.get(entityCreateSaveButtonSelector).click();
@@ -136,7 +136,9 @@ describe('Job e2e test', () => {
       });
 
       it('last delete button click should delete instance of Job', () => {
+        cy.intercept('GET', '/api/jobs/*').as('dialogDeleteRequest');
         cy.get(entityDeleteButtonSelector).last().click();
+        cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('job').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
@@ -160,14 +162,14 @@ describe('Job e2e test', () => {
     });
 
     it('should create an instance of Job', () => {
-      cy.get(`[data-cy="jobTitle"]`).type('Senior Assurance Director');
-      cy.get(`[data-cy="jobTitle"]`).should('have.value', 'Senior Assurance Director');
+      cy.get(`[data-cy="jobTitle"]`).type('Corporate Group Associate');
+      cy.get(`[data-cy="jobTitle"]`).should('have.value', 'Corporate Group Associate');
 
-      cy.get(`[data-cy="minSalary"]`).type('11195');
-      cy.get(`[data-cy="minSalary"]`).should('have.value', '11195');
+      cy.get(`[data-cy="minSalary"]`).type('64');
+      cy.get(`[data-cy="minSalary"]`).should('have.value', '64');
 
-      cy.get(`[data-cy="maxSalary"]`).type('6625');
-      cy.get(`[data-cy="maxSalary"]`).should('have.value', '6625');
+      cy.get(`[data-cy="maxSalary"]`).type('8020');
+      cy.get(`[data-cy="maxSalary"]`).should('have.value', '8020');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

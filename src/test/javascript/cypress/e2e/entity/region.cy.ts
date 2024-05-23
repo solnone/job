@@ -122,7 +122,7 @@ describe('Region e2e test', () => {
         cy.url().should('match', regionPageUrlPattern);
       });
 
-      it.skip('edit button click should load edit Region page and save', () => {
+      it('edit button click should load edit Region page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('Region');
         cy.get(entityCreateSaveButtonSelector).click();
@@ -133,7 +133,9 @@ describe('Region e2e test', () => {
       });
 
       it('last delete button click should delete instance of Region', () => {
+        cy.intercept('GET', '/api/regions/*').as('dialogDeleteRequest');
         cy.get(entityDeleteButtonSelector).last().click();
+        cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('region').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
@@ -157,8 +159,8 @@ describe('Region e2e test', () => {
     });
 
     it('should create an instance of Region', () => {
-      cy.get(`[data-cy="regionName"]`).type('frenetically');
-      cy.get(`[data-cy="regionName"]`).should('have.value', 'frenetically');
+      cy.get(`[data-cy="regionName"]`).type('than over');
+      cy.get(`[data-cy="regionName"]`).should('have.value', 'than over');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

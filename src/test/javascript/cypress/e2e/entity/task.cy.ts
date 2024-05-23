@@ -122,7 +122,7 @@ describe('Task e2e test', () => {
         cy.url().should('match', taskPageUrlPattern);
       });
 
-      it.skip('edit button click should load edit Task page and save', () => {
+      it('edit button click should load edit Task page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
         cy.getEntityCreateUpdateHeading('Task');
         cy.get(entityCreateSaveButtonSelector).click();
@@ -133,7 +133,9 @@ describe('Task e2e test', () => {
       });
 
       it('last delete button click should delete instance of Task', () => {
+        cy.intercept('GET', '/api/tasks/*').as('dialogDeleteRequest');
         cy.get(entityDeleteButtonSelector).last().click();
+        cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('task').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
@@ -157,11 +159,11 @@ describe('Task e2e test', () => {
     });
 
     it('should create an instance of Task', () => {
-      cy.get(`[data-cy="title"]`).type('mid ouch quarterly');
-      cy.get(`[data-cy="title"]`).should('have.value', 'mid ouch quarterly');
+      cy.get(`[data-cy="title"]`).type('like');
+      cy.get(`[data-cy="title"]`).should('have.value', 'like');
 
-      cy.get(`[data-cy="description"]`).type('reap where');
-      cy.get(`[data-cy="description"]`).should('have.value', 'reap where');
+      cy.get(`[data-cy="description"]`).type('ouch finally beside');
+      cy.get(`[data-cy="description"]`).should('have.value', 'ouch finally beside');
 
       cy.get(entityCreateSaveButtonSelector).click();
 
