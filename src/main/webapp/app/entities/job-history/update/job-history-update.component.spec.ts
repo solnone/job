@@ -57,10 +57,10 @@ describe('JobHistory Management Update Component', () => {
   describe('ngOnInit', () => {
     it('Should call job query and add missing value', () => {
       const jobHistory: IJobHistory = { id: 456 };
-      const job: IJob = { id: 32114 };
+      const job: IJob = { id: 29187 };
       jobHistory.job = job;
 
-      const jobCollection: IJob[] = [{ id: 3128 }];
+      const jobCollection: IJob[] = [{ id: 24736 }];
       jest.spyOn(jobService, 'query').mockReturnValue(of(new HttpResponse({ body: jobCollection })));
       const expectedCollection: IJob[] = [job, ...jobCollection];
       jest.spyOn(jobService, 'addJobToCollectionIfMissing').mockReturnValue(expectedCollection);
@@ -75,10 +75,10 @@ describe('JobHistory Management Update Component', () => {
 
     it('Should call department query and add missing value', () => {
       const jobHistory: IJobHistory = { id: 456 };
-      const department: IDepartment = { id: 27386 };
+      const department: IDepartment = { id: 21254 };
       jobHistory.department = department;
 
-      const departmentCollection: IDepartment[] = [{ id: 9569 }];
+      const departmentCollection: IDepartment[] = [{ id: 10525 }];
       jest.spyOn(departmentService, 'query').mockReturnValue(of(new HttpResponse({ body: departmentCollection })));
       const expectedCollection: IDepartment[] = [department, ...departmentCollection];
       jest.spyOn(departmentService, 'addDepartmentToCollectionIfMissing').mockReturnValue(expectedCollection);
@@ -93,10 +93,10 @@ describe('JobHistory Management Update Component', () => {
 
     it('Should call employee query and add missing value', () => {
       const jobHistory: IJobHistory = { id: 456 };
-      const employee: IEmployee = { id: 21628 };
+      const employee: IEmployee = { id: 10646 };
       jobHistory.employee = employee;
 
-      const employeeCollection: IEmployee[] = [{ id: 25764 }];
+      const employeeCollection: IEmployee[] = [{ id: 14177 }];
       jest.spyOn(employeeService, 'query').mockReturnValue(of(new HttpResponse({ body: employeeCollection })));
       const expectedCollection: IEmployee[] = [employee, ...employeeCollection];
       jest.spyOn(employeeService, 'addEmployeeToCollectionIfMissing').mockReturnValue(expectedCollection);
@@ -111,11 +111,11 @@ describe('JobHistory Management Update Component', () => {
 
     it('Should update editForm', () => {
       const jobHistory: IJobHistory = { id: 456 };
-      const job: IJob = { id: 16820 };
+      const job: IJob = { id: 28798 };
       jobHistory.job = job;
-      const department: IDepartment = { id: 11200 };
+      const department: IDepartment = { id: 4754 };
       jobHistory.department = department;
-      const employee: IEmployee = { id: 13798 };
+      const employee: IEmployee = { id: 11387 };
       jobHistory.employee = employee;
 
       activatedRoute.data = of({ jobHistory });

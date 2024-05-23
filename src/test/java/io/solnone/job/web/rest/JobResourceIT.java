@@ -581,8 +581,6 @@ class JobResourceIT {
         Job partialUpdatedJob = new Job();
         partialUpdatedJob.setId(job.getId());
 
-        partialUpdatedJob.jobTitle(UPDATED_JOB_TITLE).minSalary(UPDATED_MIN_SALARY).maxSalary(UPDATED_MAX_SALARY);
-
         restJobMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedJob.getId())

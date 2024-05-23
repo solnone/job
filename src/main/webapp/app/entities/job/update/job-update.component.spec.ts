@@ -53,10 +53,10 @@ describe('Job Management Update Component', () => {
   describe('ngOnInit', () => {
     it('Should call Task query and add missing value', () => {
       const job: IJob = { id: 456 };
-      const tasks: ITask[] = [{ id: 14134 }];
+      const tasks: ITask[] = [{ id: 32454 }];
       job.tasks = tasks;
 
-      const taskCollection: ITask[] = [{ id: 27408 }];
+      const taskCollection: ITask[] = [{ id: 15657 }];
       jest.spyOn(taskService, 'query').mockReturnValue(of(new HttpResponse({ body: taskCollection })));
       const additionalTasks = [...tasks];
       const expectedCollection: ITask[] = [...additionalTasks, ...taskCollection];
@@ -75,10 +75,10 @@ describe('Job Management Update Component', () => {
 
     it('Should call Employee query and add missing value', () => {
       const job: IJob = { id: 456 };
-      const employee: IEmployee = { id: 12326 };
+      const employee: IEmployee = { id: 9737 };
       job.employee = employee;
 
-      const employeeCollection: IEmployee[] = [{ id: 3073 }];
+      const employeeCollection: IEmployee[] = [{ id: 5124 }];
       jest.spyOn(employeeService, 'query').mockReturnValue(of(new HttpResponse({ body: employeeCollection })));
       const additionalEmployees = [employee];
       const expectedCollection: IEmployee[] = [...additionalEmployees, ...employeeCollection];
@@ -97,9 +97,9 @@ describe('Job Management Update Component', () => {
 
     it('Should update editForm', () => {
       const job: IJob = { id: 456 };
-      const task: ITask = { id: 6728 };
+      const task: ITask = { id: 1953 };
       job.tasks = [task];
-      const employee: IEmployee = { id: 24849 };
+      const employee: IEmployee = { id: 13617 };
       job.employee = employee;
 
       activatedRoute.data = of({ job });

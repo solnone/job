@@ -1,22 +1,22 @@
 import { IDepartment, NewDepartment } from './department.model';
 
 export const sampleWithRequiredData: IDepartment = {
-  id: 23365,
-  departmentName: 'across',
+  id: 15764,
+  departmentName: 'as unto psst',
 };
 
 export const sampleWithPartialData: IDepartment = {
-  id: 7508,
-  departmentName: 'justice against instead',
+  id: 29177,
+  departmentName: 'obfuscate particular hence',
 };
 
 export const sampleWithFullData: IDepartment = {
-  id: 1486,
-  departmentName: 'green piercing',
+  id: 3534,
+  departmentName: 'reliability throughout',
 };
 
 export const sampleWithNewData: NewDepartment = {
-  departmentName: 'furthermore about but',
+  departmentName: 'shoreline blah more',
   id: null,
 };
 

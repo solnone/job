@@ -160,14 +160,14 @@ describe('Job e2e test', () => {
     });
 
     it('should create an instance of Job', () => {
-      cy.get(`[data-cy="jobTitle"]`).type('Corporate Marketing Developer');
-      cy.get(`[data-cy="jobTitle"]`).should('have.value', 'Corporate Marketing Developer');
+      cy.get(`[data-cy="jobTitle"]`).type('Senior Assurance Director');
+      cy.get(`[data-cy="jobTitle"]`).should('have.value', 'Senior Assurance Director');
 
-      cy.get(`[data-cy="minSalary"]`).type('27423');
-      cy.get(`[data-cy="minSalary"]`).should('have.value', '27423');
+      cy.get(`[data-cy="minSalary"]`).type('11195');
+      cy.get(`[data-cy="minSalary"]`).should('have.value', '11195');
 
-      cy.get(`[data-cy="maxSalary"]`).type('1030');
-      cy.get(`[data-cy="maxSalary"]`).should('have.value', '1030');
+      cy.get(`[data-cy="maxSalary"]`).type('6625');
+      cy.get(`[data-cy="maxSalary"]`).should('have.value', '6625');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

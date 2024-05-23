@@ -49,10 +49,10 @@ describe('Task Management Update Component', () => {
   describe('ngOnInit', () => {
     it('Should call Job query and add missing value', () => {
       const task: ITask = { id: 456 };
-      const jobs: IJob[] = [{ id: 32082 }];
+      const jobs: IJob[] = [{ id: 4798 }];
       task.jobs = jobs;
 
-      const jobCollection: IJob[] = [{ id: 17494 }];
+      const jobCollection: IJob[] = [{ id: 13804 }];
       jest.spyOn(jobService, 'query').mockReturnValue(of(new HttpResponse({ body: jobCollection })));
       const additionalJobs = [...jobs];
       const expectedCollection: IJob[] = [...additionalJobs, ...jobCollection];
@@ -68,7 +68,7 @@ describe('Task Management Update Component', () => {
 
     it('Should update editForm', () => {
       const task: ITask = { id: 456 };
-      const job: IJob = { id: 23582 };
+      const job: IJob = { id: 1981 };
       task.jobs = [job];
 
       activatedRoute.data = of({ task });

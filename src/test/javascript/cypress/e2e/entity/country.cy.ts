@@ -157,8 +157,8 @@ describe('Country e2e test', () => {
     });
 
     it('should create an instance of Country', () => {
-      cy.get(`[data-cy="countryName"]`).type('inquisitively');
-      cy.get(`[data-cy="countryName"]`).should('have.value', 'inquisitively');
+      cy.get(`[data-cy="countryName"]`).type('sans boastfully');
+      cy.get(`[data-cy="countryName"]`).should('have.value', 'sans boastfully');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

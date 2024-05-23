@@ -49,10 +49,10 @@ describe('Employee Management Update Component', () => {
   describe('ngOnInit', () => {
     it('Should call Employee query and add missing value', () => {
       const employee: IEmployee = { id: 456 };
-      const manager: IEmployee = { id: 23117 };
+      const manager: IEmployee = { id: 8532 };
       employee.manager = manager;
 
-      const employeeCollection: IEmployee[] = [{ id: 3404 }];
+      const employeeCollection: IEmployee[] = [{ id: 9291 }];
       jest.spyOn(employeeService, 'query').mockReturnValue(of(new HttpResponse({ body: employeeCollection })));
       const additionalEmployees = [manager];
       const expectedCollection: IEmployee[] = [...additionalEmployees, ...employeeCollection];
@@ -71,10 +71,10 @@ describe('Employee Management Update Component', () => {
 
     it('Should call Department query and add missing value', () => {
       const employee: IEmployee = { id: 456 };
-      const department: IDepartment = { id: 23405 };
+      const department: IDepartment = { id: 21581 };
       employee.department = department;
 
-      const departmentCollection: IDepartment[] = [{ id: 1958 }];
+      const departmentCollection: IDepartment[] = [{ id: 7212 }];
       jest.spyOn(departmentService, 'query').mockReturnValue(of(new HttpResponse({ body: departmentCollection })));
       const additionalDepartments = [department];
       const expectedCollection: IDepartment[] = [...additionalDepartments, ...departmentCollection];
@@ -93,9 +93,9 @@ describe('Employee Management Update Component', () => {
 
     it('Should update editForm', () => {
       const employee: IEmployee = { id: 456 };
-      const manager: IEmployee = { id: 15042 };
+      const manager: IEmployee = { id: 19083 };
       employee.manager = manager;
-      const department: IDepartment = { id: 22078 };
+      const department: IDepartment = { id: 21839 };
       employee.department = department;
 
       activatedRoute.data = of({ employee });

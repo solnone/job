@@ -477,8 +477,6 @@ class JobHistoryResourceIT {
         JobHistory partialUpdatedJobHistory = new JobHistory();
         partialUpdatedJobHistory.setId(jobHistory.getId());
 
-        partialUpdatedJobHistory.startDate(UPDATED_START_DATE).endDate(UPDATED_END_DATE);
-
         restJobHistoryMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedJobHistory.getId())

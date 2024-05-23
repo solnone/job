@@ -3,18 +3,19 @@ import dayjs from 'dayjs/esm';
 import { IJobHistory, NewJobHistory } from './job-history.model';
 
 export const sampleWithRequiredData: IJobHistory = {
-  id: 15043,
+  id: 3945,
 };
 
 export const sampleWithPartialData: IJobHistory = {
-  id: 6203,
-  startDate: dayjs('2024-04-17T20:24'),
+  id: 6225,
+  endDate: dayjs('2024-04-17T07:00'),
+  language: 'ENGLISH',
 };
 
 export const sampleWithFullData: IJobHistory = {
-  id: 13850,
-  startDate: dayjs('2024-04-18T02:05'),
-  endDate: dayjs('2024-04-17T17:37'),
+  id: 6721,
+  startDate: dayjs('2024-04-17T19:19'),
+  endDate: dayjs('2024-04-17T07:22'),
   language: 'ENGLISH',
 };
 

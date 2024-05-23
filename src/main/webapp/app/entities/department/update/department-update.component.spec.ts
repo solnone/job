@@ -49,10 +49,10 @@ describe('Department Management Update Component', () => {
   describe('ngOnInit', () => {
     it('Should call location query and add missing value', () => {
       const department: IDepartment = { id: 456 };
-      const location: ILocation = { id: 17228 };
+      const location: ILocation = { id: 4721 };
       department.location = location;
 
-      const locationCollection: ILocation[] = [{ id: 27746 }];
+      const locationCollection: ILocation[] = [{ id: 9332 }];
       jest.spyOn(locationService, 'query').mockReturnValue(of(new HttpResponse({ body: locationCollection })));
       const expectedCollection: ILocation[] = [location, ...locationCollection];
       jest.spyOn(locationService, 'addLocationToCollectionIfMissing').mockReturnValue(expectedCollection);
@@ -67,7 +67,7 @@ describe('Department Management Update Component', () => {
 
     it('Should update editForm', () => {
       const department: IDepartment = { id: 456 };
-      const location: ILocation = { id: 15175 };
+      const location: ILocation = { id: 8938 };
       department.location = location;
 
       activatedRoute.data = of({ department });

@@ -160,27 +160,27 @@ describe('Employee e2e test', () => {
     });
 
     it('should create an instance of Employee', () => {
-      cy.get(`[data-cy="firstName"]`).type('Albertha');
-      cy.get(`[data-cy="firstName"]`).should('have.value', 'Albertha');
+      cy.get(`[data-cy="firstName"]`).type('Noelia');
+      cy.get(`[data-cy="firstName"]`).should('have.value', 'Noelia');
 
-      cy.get(`[data-cy="lastName"]`).type('Kirlin');
-      cy.get(`[data-cy="lastName"]`).should('have.value', 'Kirlin');
+      cy.get(`[data-cy="lastName"]`).type('Armstrong');
+      cy.get(`[data-cy="lastName"]`).should('have.value', 'Armstrong');
 
-      cy.get(`[data-cy="email"]`).type('Rylan3@gmail.com');
-      cy.get(`[data-cy="email"]`).should('have.value', 'Rylan3@gmail.com');
+      cy.get(`[data-cy="email"]`).type('Hal.Sauer49@gmail.com');
+      cy.get(`[data-cy="email"]`).should('have.value', 'Hal.Sauer49@gmail.com');
 
-      cy.get(`[data-cy="phoneNumber"]`).type('provided twitch deteriorate');
-      cy.get(`[data-cy="phoneNumber"]`).should('have.value', 'provided twitch deteriorate');
+      cy.get(`[data-cy="phoneNumber"]`).type('huzzah loyal');
+      cy.get(`[data-cy="phoneNumber"]`).should('have.value', 'huzzah loyal');
 
-      cy.get(`[data-cy="hireDate"]`).type('2024-04-17T14:07');
+      cy.get(`[data-cy="hireDate"]`).type('2024-04-18T05:22');
       cy.get(`[data-cy="hireDate"]`).blur();
-      cy.get(`[data-cy="hireDate"]`).should('have.value', '2024-04-17T14:07');
+      cy.get(`[data-cy="hireDate"]`).should('have.value', '2024-04-18T05:22');
 
-      cy.get(`[data-cy="salary"]`).type('12556');
-      cy.get(`[data-cy="salary"]`).should('have.value', '12556');
+      cy.get(`[data-cy="salary"]`).type('4190');
+      cy.get(`[data-cy="salary"]`).should('have.value', '4190');
 
-      cy.get(`[data-cy="commissionPct"]`).type('1485');
-      cy.get(`[data-cy="commissionPct"]`).should('have.value', '1485');
+      cy.get(`[data-cy="commissionPct"]`).type('29222');
+      cy.get(`[data-cy="commissionPct"]`).should('have.value', '29222');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

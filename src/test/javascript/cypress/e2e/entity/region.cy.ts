@@ -157,8 +157,8 @@ describe('Region e2e test', () => {
     });
 
     it('should create an instance of Region', () => {
-      cy.get(`[data-cy="regionName"]`).type('rare until');
-      cy.get(`[data-cy="regionName"]`).should('have.value', 'rare until');
+      cy.get(`[data-cy="regionName"]`).type('frenetically');
+      cy.get(`[data-cy="regionName"]`).should('have.value', 'frenetically');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

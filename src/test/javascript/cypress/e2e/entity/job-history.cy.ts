@@ -160,13 +160,13 @@ describe('JobHistory e2e test', () => {
     });
 
     it('should create an instance of JobHistory', () => {
-      cy.get(`[data-cy="startDate"]`).type('2024-04-17T23:52');
+      cy.get(`[data-cy="startDate"]`).type('2024-04-17T14:38');
       cy.get(`[data-cy="startDate"]`).blur();
-      cy.get(`[data-cy="startDate"]`).should('have.value', '2024-04-17T23:52');
+      cy.get(`[data-cy="startDate"]`).should('have.value', '2024-04-17T14:38');
 
-      cy.get(`[data-cy="endDate"]`).type('2024-04-17T23:03');
+      cy.get(`[data-cy="endDate"]`).type('2024-04-17T21:00');
       cy.get(`[data-cy="endDate"]`).blur();
-      cy.get(`[data-cy="endDate"]`).should('have.value', '2024-04-17T23:03');
+      cy.get(`[data-cy="endDate"]`).should('have.value', '2024-04-17T21:00');
 
       cy.get(`[data-cy="language"]`).select('SPANISH');
 

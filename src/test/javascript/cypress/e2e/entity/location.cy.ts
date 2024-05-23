@@ -157,17 +157,17 @@ describe('Location e2e test', () => {
     });
 
     it('should create an instance of Location', () => {
-      cy.get(`[data-cy="streetAddress"]`).type('pish');
-      cy.get(`[data-cy="streetAddress"]`).should('have.value', 'pish');
+      cy.get(`[data-cy="streetAddress"]`).type('upon dialogue bedevil');
+      cy.get(`[data-cy="streetAddress"]`).should('have.value', 'upon dialogue bedevil');
 
-      cy.get(`[data-cy="postalCode"]`).type('given upside-down embezzle');
-      cy.get(`[data-cy="postalCode"]`).should('have.value', 'given upside-down embezzle');
+      cy.get(`[data-cy="postalCode"]`).type('humidity awkwardly ugh');
+      cy.get(`[data-cy="postalCode"]`).should('have.value', 'humidity awkwardly ugh');
 
-      cy.get(`[data-cy="city"]`).type('Ondrickabury');
-      cy.get(`[data-cy="city"]`).should('have.value', 'Ondrickabury');
+      cy.get(`[data-cy="city"]`).type('Miguelcester');
+      cy.get(`[data-cy="city"]`).should('have.value', 'Miguelcester');
 
-      cy.get(`[data-cy="stateProvince"]`).type('perform eyeglasses');
-      cy.get(`[data-cy="stateProvince"]`).should('have.value', 'perform eyeglasses');
+      cy.get(`[data-cy="stateProvince"]`).type('zany given straight');
+      cy.get(`[data-cy="stateProvince"]`).should('have.value', 'zany given straight');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

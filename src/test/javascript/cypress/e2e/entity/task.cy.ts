@@ -157,11 +157,11 @@ describe('Task e2e test', () => {
     });
 
     it('should create an instance of Task', () => {
-      cy.get(`[data-cy="title"]`).type('anxiously ick');
-      cy.get(`[data-cy="title"]`).should('have.value', 'anxiously ick');
+      cy.get(`[data-cy="title"]`).type('mid ouch quarterly');
+      cy.get(`[data-cy="title"]`).should('have.value', 'mid ouch quarterly');
 
-      cy.get(`[data-cy="description"]`).type('within fondly only');
-      cy.get(`[data-cy="description"]`).should('have.value', 'within fondly only');
+      cy.get(`[data-cy="description"]`).type('reap where');
+      cy.get(`[data-cy="description"]`).should('have.value', 'reap where');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

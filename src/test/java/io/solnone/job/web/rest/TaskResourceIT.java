@@ -430,6 +430,8 @@ class TaskResourceIT {
         Task partialUpdatedTask = new Task();
         partialUpdatedTask.setId(task.getId());
 
+        partialUpdatedTask.title(UPDATED_TITLE).description(UPDATED_DESCRIPTION);
+
         restTaskMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedTask.getId())

@@ -571,8 +571,6 @@ class LocationResourceIT {
         Location partialUpdatedLocation = new Location();
         partialUpdatedLocation.setId(location.getId());
 
-        partialUpdatedLocation.postalCode(UPDATED_POSTAL_CODE);
-
         restLocationMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedLocation.getId())
